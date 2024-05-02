@@ -4,7 +4,11 @@ export const Query = (args?: QueryInputMetadata) => (target: Function, propertyK
     const metadata: QueryMetadata = {
         selector: args?.selector,
         multiple: args?.multiple ?? false,
-        parameterIndex
+        parameterIndex,
+    }
+
+    if (metadata.selector === undefined && metadata.multiple === true) {
+        throw new Error('Query cannot expect multiple results without a selector');
     }
 
     Reflect.defineMetadata(`${QUERY_METADATA_KEY}:${parameterIndex}`, metadata, target);

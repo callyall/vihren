@@ -14,11 +14,7 @@ export const getInjectableMetadata = (target: Function, args?: InjectableMetadat
         return metadata;
     }
 
-    let result = /constructor\s*\([^)]*\)/.exec(target.toString());
-
-    if (!result || result.length === 0) {
-        throw new Error('Invalid constructor');
-    }
+    let result = /constructor\s*\([^)]*\)/.exec(target.toString()) as RegExpExecArray;
 
     metadata.params = result[0]
         .replace(/constructor\s*\(/, '')

@@ -3,3 +3,4 @@ dist/bundle.js.LICENSE.txt
 dist/bundle.js.map
 node_modules
 package-lock.json
+coverage

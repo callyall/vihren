@@ -1,15 +1,15 @@
 import { Observable, Subscription, debounce, filter, fromEvent, interval } from "rxjs";
-import { IocContainer } from "./IocContainer";
-import { Mutation, MutationType } from "./Interfaces/mutation.interface";
-import { ComponentData } from "./Interfaces/componentData.interface";
-import { COMPONENT_METADATA_KEY, LifecycleHook } from "./Decorators/component.decorator";
-import { OnInit } from "./Interfaces/onInit.interface";
-import { OnDestroy } from "./Interfaces/onDestroy.interface";
-import { OnChange } from "./Interfaces/onChange.interface";
-import { ComponentInstance } from "./Interfaces/componentInstance.interface";
-import { InjectableMetadata } from "./Decorators/injectable.decorator";
-import { QUERY_METADATA_KEY, QueryMetadata } from "./Decorators/query.decorator";
-import { EVENT_METADATA_KEY } from "./Decorators/event.decorator";
+import { IocContainer } from "../iocContainer/IocContainer";
+import { Mutation, MutationType } from "../Interfaces/mutation.interface";
+import { ComponentData } from "../Interfaces/componentData.interface";
+import { COMPONENT_METADATA_KEY, LifecycleHook } from "../Decorators/component.decorator/component.decorator";
+import { OnInit } from "../Interfaces/onInit.interface";
+import { OnDestroy } from "../Interfaces/onDestroy.interface";
+import { OnChange } from "../Interfaces/onChange.interface";
+import { ComponentInstance } from "../Interfaces/componentInstance.interface";
+import { InjectableMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
+import { QUERY_METADATA_KEY, QueryMetadata } from "../Decorators/query.decorator/query.decorator";
+import { EVENT_METADATA_KEY } from "../Decorators/event.decorator/event.decorator";
 
 export class ComponentContainer<K extends keyof DocumentEventMap> extends IocContainer {
     private $stateObserver: Subscription

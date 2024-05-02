@@ -1,4 +1,4 @@
-import { InjectableMetadata, getInjectableMetadata } from "./injectable.decorator";
+import { InjectableMetadata, getInjectableMetadata } from "../injectable.decorator/injectable.decorator";
 
 export const COMPONENT_METADATA_KEY = 'ioc:component';
 

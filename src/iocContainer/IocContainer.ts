@@ -1,5 +1,5 @@
-import { COMPONENT_METADATA_KEY } from "./Decorators/component.decorator";
-import { INJECTABLE_METADATA_KEY, InjectableMetadata } from "./Decorators/injectable.decorator";
+import { COMPONENT_METADATA_KEY } from "../Decorators/component.decorator/component.decorator";
+import { INJECTABLE_METADATA_KEY, InjectableMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
 
 export class IocContainer {
     private values: Map<string, any> = new Map<string, any>();
@@ -45,13 +45,7 @@ export class IocContainer {
             throw new Error(`No registration found for key ${key}`);
         }
 
-        const instance = this.defaultFactory(target as Function, metadata, args);
-
-        if (metadata?.shared) {
-            this.values.set(key, instance);
-        }
-
-        return instance;
+        return this.defaultFactory(target as Function, metadata, args);
     }
 
     private defaultFactory(target: Function, metadata: InjectableMetadata | null, args?: Map<string, any>): any {

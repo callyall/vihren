@@ -1,13 +1,13 @@
-import { Component } from "./Decorators/component.decorator";
+import { Component } from "./Decorators/component.decorator/component.decorator";
 import { Mutation } from "./Interfaces/mutation.interface";
 import { OnChange } from "./Interfaces/onChange.interface";
 import { OnDestroy } from "./Interfaces/onDestroy.interface";
 import { OnInit } from "./Interfaces/onInit.interface";
-import { ComponentContainer } from "./componentContainer";
-import { Query } from "./Decorators/query.decorator";
+import { ComponentContainer } from "./componentContainer/componentContainer";
+import { Query } from "./Decorators/query.decorator/query.decorator";
 import { Observable, Subscription, interval, map, share } from "rxjs";
-import { Injectable } from "./Decorators/injectable.decorator";
-import { Event } from "./Decorators/event.decorator";
+import { Injectable } from "./Decorators/injectable.decorator/injectable.decorator";
+import { Event } from "./Decorators/event.decorator/event.decorator";
 
 @Injectable({ shared: true })
 class ExampleService {
