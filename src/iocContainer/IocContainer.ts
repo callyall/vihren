@@ -1,17 +1,16 @@
 import { COMPONENT_METADATA_KEY } from "../Decorators/component.decorator/component.decorator";
 import { INJECTABLE_METADATA_KEY, InjectableMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
+import { IocContainerInterface } from "../Interfaces/IocContainer.interface";
 
-export class IocContainer {
+export class IocContainer implements IocContainerInterface {
     private values: Map<string, any> = new Map<string, any>();
     private factories: Map<string, (args?: Map<string, any>) => any> = new Map<string, (args?: Map<string, any>) => any>();
-
-    public constructor() { }
 
     public registerValue<T>(key: string, value: T): void {
         this.values.set(key, value);
     }
 
-    public registerFactory<T>(key: string, factory: (...args: any) => T): void {
+    public registerFactory<T>(key: string, factory: (args?: Map<string, any>) => T): void {
         this.factories.set(key, factory);
     }
 

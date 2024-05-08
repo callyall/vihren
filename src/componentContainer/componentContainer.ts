@@ -1,5 +1,4 @@
 import { Observable, Subscription, debounce, filter, fromEvent, interval } from "rxjs";
-import { IocContainer } from "../iocContainer/IocContainer";
 import { Mutation, MutationType } from "../Interfaces/mutation.interface";
 import { ComponentData } from "../Interfaces/componentData.interface";
 import { COMPONENT_METADATA_KEY, LifecycleHook } from "../Decorators/component.decorator/component.decorator";
@@ -10,15 +9,14 @@ import { ComponentInstance } from "../Interfaces/componentInstance.interface";
 import { InjectableMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
 import { QUERY_METADATA_KEY, QueryMetadata } from "../Decorators/query.decorator/query.decorator";
 import { EVENT_METADATA_KEY } from "../Decorators/event.decorator/event.decorator";
+import { IocContainerInterface } from "../Interfaces/IocContainer.interface";
 
-export class ComponentContainer<K extends keyof DocumentEventMap> extends IocContainer {
+export class ComponentContainer<K extends keyof DocumentEventMap> {
     private $stateObserver: Subscription
     private components: Map<string, ComponentData<K>> = new Map<string, ComponentData<K>>();
-    private instances = new Map<string, ComponentInstance[]>();
+    private instances: Map<string, ComponentInstance[]> = new Map<string, ComponentInstance[]>();
 
-    public constructor(private root: HTMLElement) {
-        super();
-
+    public constructor(private root: HTMLElement, private iocContainer: IocContainerInterface) {
         this.$stateObserver = this.setupObserver().subscribe({
             next: (mutation: Mutation) => this.onMutation(mutation),
             complete: () => this.onDestroy(),
@@ -42,6 +40,10 @@ export class ComponentContainer<K extends keyof DocumentEventMap> extends IocCon
     }
 
     private setupObserver(): Observable<Mutation> {
+        if (!this.root.parentNode) {
+            throw new Error('Root element does not have a parent node');
+        }
+
         return new Observable<Mutation>(subscriber => {
             const observer = new MutationObserver((mutations: MutationRecord[]) => {
                 let changed: Mutation[] = [];
@@ -55,7 +57,7 @@ export class ComponentContainer<K extends keyof DocumentEventMap> extends IocCon
                     }
 
                     if (!this.root.contains(mutation.target)) {
-                        return;
+                        continue;
                     }
 
                     if (['attributes', 'characterData'].includes(mutation.type) && !changed.find((m) => m.element === mutation.target)) {
@@ -71,7 +73,13 @@ export class ComponentContainer<K extends keyof DocumentEventMap> extends IocCon
                     }
 
                     if (mutation.addedNodes) {
-                        this.initComponents();
+
+                        try {
+                            this.initComponents();
+                        } catch (error) {
+                            subscriber.error(error);
+                            return;
+                        }
 
                         for (let node of mutation.addedNodes) {
                             if (!added.find((m) => m.element === node)) {
@@ -88,10 +96,6 @@ export class ComponentContainer<K extends keyof DocumentEventMap> extends IocCon
                 added.forEach((m) => subscriber.next(m));
                 changed.forEach((m) => subscriber.next(m));
             });
-
-            if (!this.root.parentNode) {
-                throw new Error('Root element does not have a parent node');
-            }
 
             observer.observe(this.root.parentNode as Node, {
                 childList: true,
@@ -112,14 +116,14 @@ export class ComponentContainer<K extends keyof DocumentEventMap> extends IocCon
 
     private initComponent(componentData: ComponentData<K>): void {
         for (let element of this.root.querySelectorAll(componentData.metadata.selector)) {
-            let instances = this.instances.get(componentData.metadata.selector);
+            let instances: ComponentInstance[] | undefined = this.instances.get(componentData.metadata.selector);
 
             if (!instances) {
                 instances = [];
                 this.instances.set(componentData.metadata.selector, instances);
             }
 
-            const instanceId = element.getAttribute('instance');
+            const instanceId: string | null = element.getAttribute('instance');
 
             if (instanceId) {
                 const instancesLength = instances.length;
@@ -131,13 +135,13 @@ export class ComponentContainer<K extends keyof DocumentEventMap> extends IocCon
                 continue;
             }
 
-            const instance = this.resolve(componentData.constructor, this.constructArgs(componentData.constructor, (element as HTMLElement))) as Object;
+            const instance: any = this.iocContainer.resolve(componentData.constructor, this.constructArgs(componentData.constructor, (element as HTMLElement)));
 
             if (componentData.metadata.lifecycleHooks.includes(LifecycleHook.OnInit)) {
                 (instance as OnInit).onInit();
             }
 
-            element.setAttribute('instance', instances.length.toString());
+            element.setAttribute('instance', (instances.length - 1).toString());
 
             const events = new Map<string, Subscription[]>();
 
@@ -152,8 +156,9 @@ export class ComponentContainer<K extends keyof DocumentEventMap> extends IocCon
                         observable = observable.pipe(debounce(() => interval(selector?.options?.debounce)));
                     }
 
-                    // @ts-ignore
-                    subscriptions.push(observable.subscribe((event) => instance[selector.callback](event)));
+                    subscriptions.push(
+                        observable.subscribe((event) => instance[selector.callback](event))
+                    );
                 });
 
                 events.set(eventMetadataGroup.type, subscriptions);
@@ -238,13 +243,7 @@ export class ComponentContainer<K extends keyof DocumentEventMap> extends IocCon
 
     private onDestroy(): void {
         for (let [selector, componentData] of this.components) {
-            const instances = this.instances.get(selector);
-
-            if (!instances) {
-                continue;
-            }
-
-            for (let instance of instances) {
+            this.instances.get(selector)?.forEach((instance) => {
                 for (let subscriptions of instance.events.values()) {
                     subscriptions.forEach((subscription) => subscription.unsubscribe());
                 }
@@ -252,13 +251,13 @@ export class ComponentContainer<K extends keyof DocumentEventMap> extends IocCon
                 if (componentData.metadata.lifecycleHooks.includes(LifecycleHook.OnDestroy)) {
                     (instance.instance as OnDestroy).onDestroy();
                 }
-            }
+            });
         }
 
         this.$stateObserver.unsubscribe();
     }
 
-    private onError(error: any): void {
-        throw error;
+    private onError(error: Error): void {
+        console.error(error.stack);
     }
 }

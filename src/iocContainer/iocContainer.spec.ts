@@ -66,7 +66,7 @@ describe('IocContainer', () => {
 
         expect(() => container.resolve(TestClass)).toThrow(`No shared instance found for key ${key}`);
 
-        container.registerFactory(key, (args) => new TestClass(args.get('test')));
+        container.registerFactory(key, (args) => new TestClass(args?.get('test')));
 
         const instnace = container.resolve<TestClass>(TestClass, new Map<string, any>([['test', 'testValue']]));
 
@@ -89,7 +89,7 @@ describe('IocContainer', () => {
 
         expect(() => container.resolve(TestClass)).toThrow(`No value found for parameter test`);
 
-        container.registerFactory(key, (args) => new TestClass(args.get('test')));
+        container.registerFactory(key, (args) => new TestClass(args?.get('test')));
 
         const instnace = container.resolve<TestClass>(TestClass, new Map<string, any>([['test', 'testValue']]));
 

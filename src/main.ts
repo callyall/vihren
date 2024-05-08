@@ -8,6 +8,7 @@ import { Query } from "./Decorators/query.decorator/query.decorator";
 import { Observable, Subscription, interval, map, share } from "rxjs";
 import { Injectable } from "./Decorators/injectable.decorator/injectable.decorator";
 import { Event } from "./Decorators/event.decorator/event.decorator";
+import { IocContainer } from "./iocContainer/IocContainer";
 
 @Injectable({ shared: true })
 class ExampleService {
@@ -84,7 +85,7 @@ class ExampleComponent implements OnInit, OnChange, OnDestroy {
         this.element.parentElement?.appendChild(child);
     }
 
-    @Event({ type: 'keyup', selector: '#name' })
+    @Event({ type: 'keyup', selector: '#name', options: { debounce: 100 } })
     public keyUp(event: KeyboardEvent): void {
         const value = (event.target as HTMLInputElement).value;
 
@@ -93,9 +94,10 @@ class ExampleComponent implements OnInit, OnChange, OnDestroy {
 }
 
 window.onload = function () {
+    const iocContainer = new IocContainer();
+    iocContainer.registerValue(ExampleService.name, new ExampleService());
 
-    const componentContainer = new ComponentContainer(document.getElementById('app') as HTMLElement);
+    const componentContainer = new ComponentContainer(document.getElementById('app') as HTMLElement, iocContainer);
 
-    componentContainer.registerValue(ExampleService.name, new ExampleService());
     componentContainer.registerComponent(ExampleComponent);
 }
