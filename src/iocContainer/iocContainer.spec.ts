@@ -1,7 +1,7 @@
 import { Component } from "../Decorators/component.decorator/component.decorator";
-import { Injectable } from "../Decorators/injectable.decorator/injectable.decorator";
+import { Injectable, ParamMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
 import { IocContainer } from "./IocContainer";
-import {ArgumentMetadata, argumentModifier} from "../Decorators/argumentModifier.decorator/argumentModifier.decorator";
+import { ArgumentMetadata, argumentModifier } from "../Decorators/argumentModifier.decorator/argumentModifier.decorator";
 
 describe('IocContainer', () => {
     it('Should register a value', () => {
@@ -188,7 +188,7 @@ describe('IocContainer', () => {
         argumentModifier({ key: 'test', data }, Test, 1);
 
         const container = new IocContainer();
-        container.registerArgumentModifier('test', (name: string, argumentMetadata: ArgumentMetadata<string>, args: Map<string, any>): Map<string, any> => {
+        container.registerArgumentModifier('test',(argumentMetadata: ArgumentMetadata<string>, paramMetadata: ParamMetadata, args: Map<string, any>): Map<string, any> => {
             args.set('test', argumentMetadata.data);
 
             return args;

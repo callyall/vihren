@@ -1,19 +1,20 @@
-import { Observable, Subscription, debounce, filter, fromEvent, interval } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { Mutation, MutationType } from "../Interfaces/mutation.interface";
 import { ComponentData } from "../Interfaces/componentData.interface";
-import { COMPONENT_METADATA_KEY, LifecycleHook } from "../Decorators/component.decorator/component.decorator";
+import { COMPONENT_METADATA_KEY, ComponentMetadata, LifecycleHook } from "../Decorators/component.decorator/component.decorator";
 import { OnInit } from "../Interfaces/onInit.interface";
 import { OnDestroy } from "../Interfaces/onDestroy.interface";
 import { OnChange } from "../Interfaces/onChange.interface";
 import { ComponentInstance } from "../Interfaces/componentInstance.interface";
 import { ROOT_ELEMENT_KEY } from "../Decorators/query.decorator/query.decorator";
-import { EVENT_METADATA_KEY } from "../Decorators/event.decorator/event.decorator";
 import { IocContainerInterface } from "../Interfaces/IocContainer.interface";
+import { CALLBACK_METADATA_KEY, CallbackSetupFunction } from "../Decorators/callback.decorator/callback.decorator";
 
-export class ComponentContainer<K extends keyof DocumentEventMap> {
+export class ComponentContainer {
     private $stateObserver: Subscription
-    private components: Map<string, ComponentData<K>> = new Map<string, ComponentData<K>>();
+    private components: Map<string, ComponentData> = new Map<string, ComponentData>();
     private instances: Map<string, ComponentInstance[]> = new Map<string, ComponentInstance[]>();
+    private callbackSetupFunctions: Map<string, CallbackSetupFunction<any>> = new Map<string, CallbackSetupFunction<any>>();
 
     public constructor(private root: HTMLElement, private iocContainer: IocContainerInterface) {
         this.$stateObserver = this.setupObserver().subscribe({
@@ -25,17 +26,21 @@ export class ComponentContainer<K extends keyof DocumentEventMap> {
 
     public registerComponent(constructor: Function): void {
         const metadata = Reflect.getMetadata(COMPONENT_METADATA_KEY, constructor);
-        const eventMetadata = Reflect.getMetadata(EVENT_METADATA_KEY, constructor);
+        const callbackMetadata = Reflect.getMetadata(CALLBACK_METADATA_KEY, constructor);
 
         if (!metadata) {
             throw new Error('Component metadata not found');
         }
 
-        const componentData = { constructor, metadata, eventMetadata };
+        const componentData = { constructor, metadata, callbackMetadata };
 
         this.components.set(metadata.selector, componentData);
 
         this.initComponent(componentData);
+    }
+
+    public registerCallbackSetupFunction<T>(key: string, callbackSetupFunction: CallbackSetupFunction<T>): void {
+        this.callbackSetupFunctions.set(key, callbackSetupFunction);
     }
 
     private setupObserver(): Observable<Mutation> {
@@ -113,7 +118,7 @@ export class ComponentContainer<K extends keyof DocumentEventMap> {
         }
     }
 
-    private initComponent(componentData: ComponentData<K>): void {
+    private initComponent(componentData: ComponentData): void {
         for (let element of this.root.querySelectorAll(componentData.metadata.selector)) {
             let instances: ComponentInstance[] | undefined = this.instances.get(componentData.metadata.selector);
 
@@ -142,28 +147,22 @@ export class ComponentContainer<K extends keyof DocumentEventMap> {
 
             element.setAttribute('instance', (instances.length - 1).toString());
 
-            const events = new Map<string, Subscription[]>();
+            const subscriptions: Subscription[] = [];
+            const instanceObject = { instance, element: element as HTMLElement, subscriptions };
 
-            componentData.eventMetadata?.forEach((eventMetadataGroup) => {
-                const $event = fromEvent(element, eventMetadataGroup.type);
-                const subscriptions: Subscription[] = [];
+            for (let [_, metadataArr] of componentData.callbackMetadata ?? []) {
+                metadataArr.forEach((metadata) => {
+                    const callbackSetupFunction = this.callbackSetupFunctions.get(metadata.key);
 
-                eventMetadataGroup.selectors.forEach((selector) => {
-                    let observable = $event.pipe(filter((event) => (event.target as HTMLElement).matches(selector.selector)));
-
-                    if (selector?.options?.debounce) {
-                        observable = observable.pipe(debounce(() => interval(selector?.options?.debounce)));
+                    if (!callbackSetupFunction) {
+                        throw new Error(`Callback setup function not found for key ${metadata.key}`);
                     }
 
-                    subscriptions.push(
-                        observable.subscribe((event) => instance[selector.callback](event))
-                    );
+                    subscriptions.push(callbackSetupFunction(metadata, instanceObject, this.iocContainer));
                 });
+            }
 
-                events.set(eventMetadataGroup.type, subscriptions);
-            })
-
-            instances.push({ instance, element: element as HTMLElement, events });
+            instances.push(instanceObject);
         }
     }
 
@@ -200,15 +199,7 @@ export class ComponentContainer<K extends keyof DocumentEventMap> {
                     const element = instance.element;
 
                     if (element === mutation.element && mutation.type == MutationType.Removed) {
-                        if (instance.events) {
-                            for (let subscriptions of instance.events.values()) {
-                                subscriptions.forEach((subscription) => subscription.unsubscribe());
-                            }
-                        }
-
-                        if (metadata.lifecycleHooks.includes(LifecycleHook.OnDestroy)) {
-                            (instance.instance as OnDestroy).onDestroy();
-                        }
+                        this.destroyInstance(instance, metadata);
 
                         const instanceId = Number(element.getAttribute('instance'));
 
@@ -226,18 +217,18 @@ export class ComponentContainer<K extends keyof DocumentEventMap> {
 
     private onDestroy(): void {
         for (let [selector, componentData] of this.components) {
-            this.instances.get(selector)?.forEach((instance) => {
-                for (let subscriptions of instance.events.values()) {
-                    subscriptions.forEach((subscription) => subscription.unsubscribe());
-                }
-
-                if (componentData.metadata.lifecycleHooks.includes(LifecycleHook.OnDestroy)) {
-                    (instance.instance as OnDestroy).onDestroy();
-                }
-            });
+            this.instances.get(selector)?.forEach((instance) => this.destroyInstance(instance, componentData.metadata));
         }
 
         this.$stateObserver.unsubscribe();
+    }
+
+    private destroyInstance(instance: ComponentInstance, componentMetadata: ComponentMetadata): void {
+        instance.subscriptions.forEach((subscription) => subscription.unsubscribe());
+
+        if (componentMetadata.lifecycleHooks.includes(LifecycleHook.OnDestroy)) {
+            (instance.instance as OnDestroy).onDestroy();
+        }
     }
 
     private onError(error: Error): void {

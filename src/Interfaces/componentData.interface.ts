@@ -1,8 +1,8 @@
 import { ComponentMetadata } from "../Decorators/component.decorator/component.decorator";
-import { EventMetadataGroup } from "../Decorators/event.decorator/event.decorator";
+import { CallbackMetadata } from "../Decorators/callback.decorator/callback.decorator";
 
-export interface ComponentData<K extends keyof DocumentEventMap> {
+export interface ComponentData {
     constructor: Function;
     metadata: ComponentMetadata;
-    eventMetadata?: EventMetadataGroup<K>[];
+    callbackMetadata?: Map<string, CallbackMetadata<any>[]>;
 }

@@ -42,7 +42,7 @@ describe('Component Decorator', () => {
         }
     ]
         .forEach(({ target, selector, lifecycleHooks }, i) => {
-            test(`Should define metadata for a component dataset ${i}`, () => {
+            it(`Should define metadata for a component dataset ${i}`, () => {
                 Component({ selector })(target);
         
                 const metadata = Reflect.getMetadata(COMPONENT_METADATA_KEY, target) as ComponentMetadata;

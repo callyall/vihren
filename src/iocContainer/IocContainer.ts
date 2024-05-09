@@ -1,10 +1,7 @@
 import { COMPONENT_METADATA_KEY } from "../Decorators/component.decorator/component.decorator";
 import { INJECTABLE_METADATA_KEY, InjectableMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
-import {FactoryFunction, IocContainerInterface, ModifierFunction} from "../Interfaces/IocContainer.interface";
-import {
-    ARGUMENT_MODIFIER_METADATA_KEY,
-    ArgumentMetadata
-} from "../Decorators/argumentModifier.decorator/argumentModifier.decorator";
+import { FactoryFunction, IocContainerInterface, ModifierFunction } from "../Interfaces/IocContainer.interface";
+import { ARGUMENT_MODIFIER_METADATA_KEY, ArgumentMetadata } from "../Decorators/argumentModifier.decorator/argumentModifier.decorator";
 
 export class IocContainer implements IocContainerInterface {
     private values: Map<string, any> = new Map<string, any>();
@@ -120,7 +117,7 @@ export class IocContainer implements IocContainerInterface {
 
             const modifierFunction = this.argumentModifiers.get(argumentModifierMetadata.key) as ModifierFunction<any>;
             
-            args = modifierFunction(param.name, argumentModifierMetadata, args);
+            args = modifierFunction(argumentModifierMetadata, param, args);
         });
 
         return args;

@@ -1,40 +1,38 @@
+import { callback, CallbackMetadata, CallbackSetupFunction } from "../callback.decorator/callback.decorator";
+import { IocContainerInterface } from "../../Interfaces/IocContainer.interface";
+import { debounce, filter, fromEvent, interval, Subscription } from "rxjs";
+import { ComponentInstance } from "../../Interfaces/componentInstance.interface";
+
 export const EVENT_METADATA_KEY = 'method:event';
 
-export const Event = <K extends keyof DocumentEventMap>(args: EventMetadatInput<K>) => (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-    const metadata = (Reflect.getMetadata(EVENT_METADATA_KEY, target.constructor) ?? []) as EventMetadataGroup<K>[];
-
-    const group = metadata.find((group) => group.type === args.type);
-
-    if (group) {
-        group.selectors.push({ selector: args.selector, options: args.options, callback: propertyKey as string});
-
-        Reflect.defineMetadata(EVENT_METADATA_KEY, metadata, target.constructor);
-
-        return;
-    }
-
-    metadata.push({
-        type: args.type,
-        selectors: [{ selector: args.selector, options: args.options, callback: propertyKey as string }]
-    });
-
-    Reflect.defineMetadata(EVENT_METADATA_KEY, metadata, target.constructor);
+export const Event = (args: EventMetadata) => (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+    callback<EventMetadata>(
+        {
+            callback: propertyKey as string,
+            key: EVENT_METADATA_KEY,
+            data: args
+        },
+        target.constructor,
+        propertyKey
+    );
 };
 
-export interface EventMetadataGroup<K extends keyof DocumentEventMap> {
-    type: K,
-    selectors: EventMetadataSelector[]
-}
+export const eventCallbackSetupFunction: CallbackSetupFunction<EventMetadata> = (metadata: CallbackMetadata<EventMetadata>, instance: ComponentInstance, iocContainer: IocContainerInterface): Subscription => {
+    let observable = fromEvent(instance.element, metadata.data.type)
+        .pipe(filter((event: Event) => (event.target as HTMLElement).matches(metadata.data.selector)));
 
-export interface EventMetadatInput<K extends keyof DocumentEventMap> {
-    type: K,
-    selector: string,
-    options?: EventOptions
-}
+    if (metadata.data.options?.debounce) {
+        observable = observable.pipe(debounce(() => interval(metadata.data.options?.debounce)));
+    }   
 
-export interface EventMetadataSelector {
+    return observable.subscribe((event: Event) => instance.instance[metadata.callback](event));
+};
+
+export type DomEvent = keyof DocumentEventMap;
+
+export interface EventMetadata {
+    type: DomEvent;
     selector: string;
-    callback: string;
     options?: EventOptions;
 }
 

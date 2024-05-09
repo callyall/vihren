@@ -1,6 +1,7 @@
-import {ArgumentMetadata} from "../Decorators/argumentModifier.decorator/argumentModifier.decorator";
+import { ArgumentMetadata } from "../Decorators/argumentModifier.decorator/argumentModifier.decorator";
+import { ParamMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
 
-export type ModifierFunction<T> = (name: string, argumentMetadata: ArgumentMetadata<T>, args: Map<string, any>) => Map<string, any>;
+export type ModifierFunction<T> = (argumentMetadata: ArgumentMetadata<T>, paramMetadata: ParamMetadata, args: Map<string, any>) => Map<string, any>;
 export type FactoryFunction<T> = (args?: Map<string, any>) => T;
 
 export interface IocContainerInterface {

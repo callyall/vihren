@@ -30,9 +30,14 @@ export const getInjectableMetadata = (target: Function, args?: InjectableMetadat
 }
 
 export interface InjectableMetadata extends InjectableMetadataInput {
-    params?: Array<{ name: string, type: Function }>;
-};
+    params?: ParamMetadata[];
+}
+
+export interface ParamMetadata {
+    name: string;
+    type: Function;
+}
 
 export interface InjectableMetadataInput {
     shared: boolean;
-};
+}

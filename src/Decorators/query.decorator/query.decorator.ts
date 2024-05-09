@@ -1,5 +1,6 @@
 import { ArgumentMetadata, argumentModifier } from "../argumentModifier.decorator/argumentModifier.decorator";
 import { ModifierFunction } from "../../Interfaces/IocContainer.interface";
+import { ParamMetadata } from "../injectable.decorator/injectable.decorator";
 
 export const ROOT_ELEMENT_KEY = 'rootElement';
 export const QUERY_METADATA_KEY = 'argument:query';
@@ -23,7 +24,7 @@ export const Query = (args?: QueryInputMetadata) => (target: Function, propertyK
     argumentModifier<QueryMetadata>(metadata, target, parameterIndex);
 }
 
-export const queryModifier: ModifierFunction<QueryMetadata> = (name: string, argumentMetadata: ArgumentMetadata<QueryMetadata>, args: Map<string, any>): Map<string, any> => {
+export const queryModifierFunction: ModifierFunction<QueryMetadata> = (argumentMetadata: ArgumentMetadata<QueryMetadata>, paramMetadata: ParamMetadata, args: Map<string, any>): Map<string, any> => {
     if (!args.has(ROOT_ELEMENT_KEY)) {
         throw new Error('No root element found');
     }
@@ -31,8 +32,34 @@ export const queryModifier: ModifierFunction<QueryMetadata> = (name: string, arg
     const rootElement = args.get(ROOT_ELEMENT_KEY) as HTMLElement;
     const queryMetadata: QueryMetadata = argumentMetadata.data as QueryMetadata;
 
+    if (paramMetadata.type.name === ActiveElementReference.name) {
+        if (!queryMetadata.selector) {
+            throw new Error('ActiveElementReference cannot be used without a selector');
+        }
+
+        if (queryMetadata.multiple) {
+            throw new Error('ActiveElementReference cannot be used with multiple results');
+        }
+
+        args.set(paramMetadata.name, new ActiveElementReference(rootElement, queryMetadata.selector));
+        return args;
+    }
+
+    if (paramMetadata.type.name === ActiveElementCollection.name) {
+        if (!queryMetadata.selector) {
+            throw new Error('ActiveElementCollection cannot be used without a selector');
+        }
+
+        if (!queryMetadata.multiple) {
+            throw new Error('ActiveElementCollection cannot be used with a single result');
+        }
+
+        args.set(paramMetadata.name, new ActiveElementCollection(rootElement, queryMetadata.selector));
+        return args;
+    }
+
     args.set(
-        name,
+        paramMetadata.name,
         queryMetadata.selector
             ? (
                 queryMetadata.multiple
@@ -43,6 +70,22 @@ export const queryModifier: ModifierFunction<QueryMetadata> = (name: string, arg
     );
 
     return args;
+}
+
+export class ActiveElementReference {
+    public constructor(private rootElement: HTMLElement, private selector: string) {}
+
+    public get(): HTMLElement | null {
+        return this.rootElement.querySelector(this.selector);
+    }
+}
+
+export class ActiveElementCollection {
+    public constructor(private rootElement: HTMLElement, private selector: string) {}
+
+    public get(): HTMLElement[] {
+        return Array.from(this.rootElement.querySelectorAll(this.selector));
+    }
 }
 
 export interface QueryInputMetadata {

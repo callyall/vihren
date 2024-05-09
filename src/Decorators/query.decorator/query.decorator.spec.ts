@@ -1,4 +1,4 @@
-import {QUERY_METADATA_KEY, Query, QueryMetadata, queryModifier, ROOT_ELEMENT_KEY} from './query.decorator';
+import { QUERY_METADATA_KEY, Query, QueryMetadata, queryModifierFunction, ROOT_ELEMENT_KEY, ActiveElementReference, ActiveElementCollection } from './query.decorator';
 import 'reflect-metadata';
 import { ARGUMENT_MODIFIER_METADATA_KEY, ArgumentMetadata } from "../argumentModifier.decorator/argumentModifier.decorator";
 
@@ -78,9 +78,9 @@ describe('QueryDecorator', () => {
 
     it('Should fail to modify arguments', () => {
         expect(() => {
-            queryModifier(
-                'test',
+            queryModifierFunction(
                 { key: QUERY_METADATA_KEY, data: { multiple: false, parameterIndex: 0 }},
+                { name: 'test', type: HTMLElement },
                 new Map<string, any>()
             );
         }).toThrow('No root element found');
@@ -99,9 +99,9 @@ describe('QueryDecorator', () => {
         const args = new Map<string, any>();
         args.set(ROOT_ELEMENT_KEY, rootElement);
 
-        let result = queryModifier(
-            name,
+        let result = queryModifierFunction(
             { key: QUERY_METADATA_KEY, data: { multiple: false, parameterIndex: 0 }},
+            { name, type: HTMLElement },
             args
         );
 
@@ -109,9 +109,9 @@ describe('QueryDecorator', () => {
         expect(result.size).toEqual(2);
         expect(result.get(name)).toEqual(rootElement);
 
-        result = queryModifier(
-            name,
+        result = queryModifierFunction(
             { key: QUERY_METADATA_KEY, data: { selector: '#child', multiple: false, parameterIndex: 0 }},
+            { name, type: HTMLElement },
             args
         );
 
@@ -119,14 +119,66 @@ describe('QueryDecorator', () => {
         expect(result.size).toEqual(2);
         expect(result.get(name)).toEqual(document.getElementById('child'));
 
-        result = queryModifier(
-            name,
+        result = queryModifierFunction(
             { key: QUERY_METADATA_KEY, data: { selector: 'div', multiple: true, parameterIndex: 0 }},
+            { name, type: NodeList },
             args
         );
 
         expect(result).toBeDefined();
         expect(result.size).toEqual(2);
         expect(result.get(name)).toEqual(rootElement.querySelectorAll('div'));
+
+        result = queryModifierFunction(
+            { key: QUERY_METADATA_KEY, data: { selector: 'div', multiple: false, parameterIndex: 0 }},
+            { name, type: ActiveElementReference },
+            args
+        );
+
+        expect(result).toBeDefined();
+        expect(result.size).toEqual(2);
+        expect(result.get(name).get()).toEqual(rootElement.querySelector('div'));
+
+        result = queryModifierFunction(
+            { key: QUERY_METADATA_KEY, data: { selector: 'div', multiple: true, parameterIndex: 0 }},
+            { name, type: ActiveElementCollection },
+            args
+        );
+
+        expect(result).toBeDefined();
+        expect(result.size).toEqual(2);
+        expect(result.get(name).get()).toEqual(Array.from(rootElement.querySelectorAll('div')));
+
+        expect(() => {
+            queryModifierFunction(
+                { key: QUERY_METADATA_KEY, data: { multiple: false, parameterIndex: 0 }},
+                { name, type: ActiveElementReference },
+                args
+            );
+        }).toThrow('ActiveElementReference cannot be used without a selector');
+
+        expect(() => {
+            queryModifierFunction(
+                { key: QUERY_METADATA_KEY, data: { selector: 'div', multiple: true, parameterIndex: 0 }},
+                { name, type: ActiveElementReference },
+                args
+            );
+        }).toThrow('ActiveElementReference cannot be used with multiple results');
+
+        expect(() => {
+            queryModifierFunction(
+                { key: QUERY_METADATA_KEY, data: { multiple: true, parameterIndex: 0 }},
+                { name, type: ActiveElementCollection },
+                args
+            );
+        }).toThrow('ActiveElementCollection cannot be used without a selector');
+
+        expect(() => {
+            queryModifierFunction(
+                { key: QUERY_METADATA_KEY, data: { selector: 'div', multiple: false, parameterIndex: 0 }},
+                { name, type: ActiveElementCollection },
+                args
+            );
+        }).toThrow('ActiveElementCollection cannot be used with a single result');
     });
 });

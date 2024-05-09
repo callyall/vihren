@@ -2,7 +2,7 @@ import { INJECTABLE_METADATA_KEY, Injectable, InjectableMetadata } from "./injec
 
 
 describe('Injectable Decorator', () => {
-    test('Should define shared with no constructor parameters', () => {
+    it('Should define shared with no constructor parameters', () => {
         const target = class {
             constructor() { }
         }
@@ -18,7 +18,7 @@ describe('Injectable Decorator', () => {
         expect(metadata.params).toBeUndefined();
     });
 
-    test('Should define not shared with no constructor parameters', () => {
+    it('Should define not shared with no constructor parameters', () => {
         const target = class {
             constructor() { }
         }
@@ -34,7 +34,7 @@ describe('Injectable Decorator', () => {
         expect(metadata.params).toBeUndefined();
     });
 
-    test('Should define shared with constructor parameters', () => {
+    it('Should define shared with constructor parameters', () => {
         const target = class {
             constructor(name: string, age: number) { }
         }
@@ -58,7 +58,7 @@ describe('Injectable Decorator', () => {
         expect(metadata.params?.sort()).toEqual(params.sort());
     });
 
-    test('Should define not shared with constructor parameters', () => {
+    it('Should define not shared with constructor parameters', () => {
         const target = class {
             constructor(name: string, age: number) { }
         }

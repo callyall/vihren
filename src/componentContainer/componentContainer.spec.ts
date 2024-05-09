@@ -1,12 +1,13 @@
 import { Component } from "../Decorators/component.decorator/component.decorator";
-import { Query, QUERY_METADATA_KEY, queryModifier } from "../Decorators/query.decorator/query.decorator";
+import { Query, QUERY_METADATA_KEY, queryModifierFunction } from "../Decorators/query.decorator/query.decorator";
 import { OnChange } from "../Interfaces/onChange.interface";
 import { OnDestroy } from "../Interfaces/onDestroy.interface";
 import { OnInit } from "../Interfaces/onInit.interface";
 import { ComponentContainer } from "./componentContainer";
 import { Injectable } from "../Decorators/injectable.decorator/injectable.decorator";
-import { Event } from "../Decorators/event.decorator/event.decorator";
+import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "../Decorators/event.decorator/event.decorator";
 import { IocContainer } from "../iocContainer/IocContainer";
+import { callback } from "../Decorators/callback.decorator/callback.decorator";
 
 describe('ComponentContainer', () => {
     const iocContainer = new IocContainer();
@@ -20,7 +21,7 @@ describe('ComponentContainer', () => {
 
     const service = new TestService();
 
-    iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifier);
+    iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifierFunction);
     iocContainer.registerValue(TestService.name, service);
 
     it('Should fail to instantiate a component container', () => {
@@ -47,10 +48,14 @@ describe('ComponentContainer', () => {
                     </div>
                     <div class="test-component-2" data-name="tester"></div>
                 </div>
+                <div id="app3">
+                    <div class="test-component"><div>
+                <div>
             </div>
         `;
     const rootElement = document.getElementById('app') as HTMLElement;
     const container = new ComponentContainer(rootElement, iocContainer);
+    container.registerCallbackSetupFunction(EVENT_METADATA_KEY, eventCallbackSetupFunction);
 
     @Component({ selector: '.test-component' })
     class TestComponent implements OnInit, OnChange, OnDestroy {
@@ -143,6 +148,7 @@ describe('ComponentContainer', () => {
         service.wasDestroyed = false;
         const rootElement = document.getElementById('app2') as HTMLElement;
         const container = new ComponentContainer(rootElement, iocContainer);
+        container.registerCallbackSetupFunction(EVENT_METADATA_KEY, eventCallbackSetupFunction);
 
         container.registerComponent(TestComponent);
         container.registerComponent(TestComponent2);
@@ -151,6 +157,21 @@ describe('ComponentContainer', () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
 
         expect(service.wasDestroyed).toBe(true);
+    });
+
+    it('Should throw callback setup function not found for key test', () => {
+        @Component({ selector: '.test-component' })
+        class OddComponent {
+            public onSomething() {}
+        }
+
+        callback({ callback: 'onSomething', key: 'test', data: '' }, OddComponent, 'onSomething');
+
+        const rootElement = document.getElementById('app3') as HTMLElement;
+        const container = new ComponentContainer(rootElement, iocContainer);
+        container.registerCallbackSetupFunction(EVENT_METADATA_KEY, eventCallbackSetupFunction);
+
+        expect(() => container.registerComponent(OddComponent)).toThrow('Callback setup function not found for key test');
     });
 
     afterAll(() => {

@@ -1,8 +1,12 @@
-import { Event, EventMetadataGroup } from './event.decorator';
+import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction, EventMetadata } from './event.decorator';
 import 'reflect-metadata';
+import { CALLBACK_METADATA_KEY, CallbackMetadata } from "../callback.decorator/callback.decorator";
+import { ComponentInstance } from "../../Interfaces/componentInstance.interface";
+import { IocContainer } from "../../iocContainer/IocContainer";
+import { Subscription } from "rxjs";
 
 describe('Event Decorator', () => {
-    test('Should define metadata for an event dataset', () => {
+    it('Should define metadata for an event dataset', () => {
         class TestClass {
             @Event({ type: 'click', selector: 'button' })
             public onClick() { }
@@ -17,42 +21,67 @@ describe('Event Decorator', () => {
             public onChange() { }
         }
 
-        const metadata = Reflect.getMetadata('method:event', TestClass) as EventMetadataGroup<any>[];
+        const metadata = Reflect.getMetadata(CALLBACK_METADATA_KEY, TestClass) as Map<string, CallbackMetadata<EventMetadata>[]>;
 
         expect(metadata).toBeDefined();
-        expect(metadata.length).toBe(3);
+        expect(metadata.size).toBe(4);
 
         [
             {
-                type: 'click',
-                selectors: [
-                    {
-                        selector: 'button',
-                        callback: 'onClick'
-                    },
-                    {
-                        selector: 'a',
-                        callback: 'onSecondClick',
-                        options: {
-                            debounce: 100
-                        }
-                    },
-                ]
+                callback: 'onClick',
+                key: EVENT_METADATA_KEY,
+                data: { type: 'click', selector: 'button' }
             },
             {
-                type: 'keyup',
-                selectors: [{ selector: 'input', callback: 'onKeyUp' }]
+                callback: 'onSecondClick',
+                key: EVENT_METADATA_KEY,
+                data: { type: 'click', selector: 'a', options: { debounce: 100 } }
             },
             {
-                type: 'change',
-                selectors: [{ selector: 'select', callback: 'onChange' }]
+                callback: 'onKeyUp',
+                key: EVENT_METADATA_KEY,
+                data: { type: 'keyup', selector: 'input' }
+            },
+            {
+                callback: 'onChange',
+                key: EVENT_METADATA_KEY,
+                data: { type: 'change', selector: 'select' }
             }
         ]
-            .forEach((groupt, i) => {
-                const group = metadata.find((group) => group.type === groupt.type) as EventMetadataGroup<any>;
+            .forEach((metadataEntry) => {
+                const storedArray = metadata.get(metadataEntry.callback) as CallbackMetadata<EventMetadata>[];
 
-                expect(group).toBeDefined();
-                expect(group.selectors.sort()).toEqual(groupt.selectors.sort());
+                expect(storedArray).toBeInstanceOf(Array);
+                expect(storedArray.length).toBe(1);
+                expect(storedArray[0]).toEqual(metadataEntry);
             });
+    });
+
+    it('Should setup event', async () => {
+        document.body.innerHTML = `<div id="component"><button></button></div>`;
+
+        const metadata: CallbackMetadata<EventMetadata> = {
+           callback: 'onClick',
+           key: EVENT_METADATA_KEY,
+           data: { type: 'click', selector: 'button', options: { debounce: 100 } }
+        };
+
+        const instance: ComponentInstance = {
+            element: document.getElementById('component') as HTMLElement,
+            instance: {
+                onClick: jest.fn()
+            },
+            subscriptions: []
+        };
+
+        const iocContainer = new IocContainer();
+
+        expect(eventCallbackSetupFunction(metadata, instance, iocContainer)).toBeInstanceOf(Subscription);
+
+        document.querySelector('button')?.click();
+        // Simulate debounce
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        expect(instance.instance.onClick).toHaveBeenCalled();
     });
 });

@@ -4,10 +4,10 @@ import { OnChange } from "./Interfaces/onChange.interface";
 import { OnDestroy } from "./Interfaces/onDestroy.interface";
 import { OnInit } from "./Interfaces/onInit.interface";
 import { ComponentContainer } from "./componentContainer/componentContainer";
-import { Query, QUERY_METADATA_KEY, queryModifier } from "./Decorators/query.decorator/query.decorator";
+import { ActiveElementCollection, Query, QUERY_METADATA_KEY, queryModifierFunction } from "./Decorators/query.decorator/query.decorator";
 import { Observable, Subscription, interval, map, share } from "rxjs";
 import { Injectable } from "./Decorators/injectable.decorator/injectable.decorator";
-import { Event } from "./Decorators/event.decorator/event.decorator";
+import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "./Decorators/event.decorator/event.decorator";
 import { IocContainer } from "./iocContainer/IocContainer";
 
 @Injectable({ shared: true })
@@ -47,6 +47,7 @@ class ExampleComponent implements OnInit, OnChange, OnDestroy {
         @Query({ selector: ':scope > .title' }) private title: HTMLHeadingElement,
         @Query({ selector: ':scope > .second' }) private second: HTMLParagraphElement,
         @Query({ selector: '#input' }) private input: HTMLParagraphElement,
+        @Query({ selector: 'p', multiple: true }) private paragraphs: ActiveElementCollection,
         private name: string,
         private age: number,
         private exampleService: ExampleService
@@ -65,6 +66,9 @@ class ExampleComponent implements OnInit, OnChange, OnDestroy {
         this.$second = this.exampleService.getSecond().subscribe((second) => {
             this.second.innerText = `Second: ${second}`;
         });
+
+        console.log(this.paragraphs);
+        console.log(this.paragraphs.get());
     }
 
     @Event({ type: 'click', selector: '.title' })
@@ -95,10 +99,11 @@ class ExampleComponent implements OnInit, OnChange, OnDestroy {
 
 window.onload = function () {
     const iocContainer = new IocContainer();
-    iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifier)
+    iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifierFunction)
     iocContainer.registerValue(ExampleService.name, new ExampleService());
 
     const componentContainer = new ComponentContainer(document.getElementById('app') as HTMLElement, iocContainer);
+    componentContainer.registerCallbackSetupFunction(EVENT_METADATA_KEY, eventCallbackSetupFunction);
 
     componentContainer.registerComponent(ExampleComponent);
 }
