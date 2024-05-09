@@ -5,4 +5,4 @@ export interface ComponentData<K extends keyof DocumentEventMap> {
     constructor: Function;
     metadata: ComponentMetadata;
     eventMetadata?: EventMetadataGroup<K>[];
-};
+}

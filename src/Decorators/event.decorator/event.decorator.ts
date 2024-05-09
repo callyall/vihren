@@ -24,20 +24,20 @@ export const Event = <K extends keyof DocumentEventMap>(args: EventMetadatInput<
 export interface EventMetadataGroup<K extends keyof DocumentEventMap> {
     type: K,
     selectors: EventMetadataSelector[]
-};
+}
 
 export interface EventMetadatInput<K extends keyof DocumentEventMap> {
     type: K,
     selector: string,
     options?: EventOptions
-};
+}
 
 export interface EventMetadataSelector {
     selector: string;
     callback: string;
     options?: EventOptions;
-};
+}
 
 export interface EventOptions {
     debounce?: number;
-};
+}

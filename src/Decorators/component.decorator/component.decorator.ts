@@ -12,14 +12,14 @@ export const Component = (args: ComponentMetadataInput): ClassDecorator => (targ
 
 export interface ComponentMetadata extends InjectableMetadata, ComponentMetadataInput {
     lifecycleHooks: LifecycleHook[];
-};
+}
 
 export interface ComponentMetadataInput {
     selector: string;
-};
+}
 
 export enum LifecycleHook {
     OnInit    = 'onInit',
     OnChange  = 'onChange',
     OnDestroy = 'onDestroy',
-};
+}
