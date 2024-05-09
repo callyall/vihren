@@ -4,7 +4,7 @@ import { OnChange } from "./Interfaces/onChange.interface";
 import { OnDestroy } from "./Interfaces/onDestroy.interface";
 import { OnInit } from "./Interfaces/onInit.interface";
 import { ComponentContainer } from "./componentContainer/componentContainer";
-import { Query } from "./Decorators/query.decorator/query.decorator";
+import { Query, QUERY_METADATA_KEY, queryModifier } from "./Decorators/query.decorator/query.decorator";
 import { Observable, Subscription, interval, map, share } from "rxjs";
 import { Injectable } from "./Decorators/injectable.decorator/injectable.decorator";
 import { Event } from "./Decorators/event.decorator/event.decorator";
@@ -95,6 +95,7 @@ class ExampleComponent implements OnInit, OnChange, OnDestroy {
 
 window.onload = function () {
     const iocContainer = new IocContainer();
+    iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifier)
     iocContainer.registerValue(ExampleService.name, new ExampleService());
 
     const componentContainer = new ComponentContainer(document.getElementById('app') as HTMLElement, iocContainer);

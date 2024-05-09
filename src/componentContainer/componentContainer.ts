@@ -6,8 +6,7 @@ import { OnInit } from "../Interfaces/onInit.interface";
 import { OnDestroy } from "../Interfaces/onDestroy.interface";
 import { OnChange } from "../Interfaces/onChange.interface";
 import { ComponentInstance } from "../Interfaces/componentInstance.interface";
-import { InjectableMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
-import { QUERY_METADATA_KEY, QueryMetadata } from "../Decorators/query.decorator/query.decorator";
+import { ROOT_ELEMENT_KEY } from "../Decorators/query.decorator/query.decorator";
 import { EVENT_METADATA_KEY } from "../Decorators/event.decorator/event.decorator";
 import { IocContainerInterface } from "../Interfaces/IocContainer.interface";
 
@@ -135,7 +134,7 @@ export class ComponentContainer<K extends keyof DocumentEventMap> {
                 continue;
             }
 
-            const instance: any = this.iocContainer.resolve(componentData.constructor, this.constructArgs(componentData.constructor, (element as HTMLElement)));
+            const instance: any = this.iocContainer.resolve(componentData.constructor, this.constructArgs((element as HTMLElement)));
 
             if (componentData.metadata.lifecycleHooks.includes(LifecycleHook.OnInit)) {
                 (instance as OnInit).onInit();
@@ -168,7 +167,7 @@ export class ComponentContainer<K extends keyof DocumentEventMap> {
         }
     }
 
-    private constructArgs(constructor: Function, element: HTMLElement): Map<string, any> {
+    private constructArgs(element: HTMLElement): Map<string, any> {
         const args = element.dataset;
         const result = new Map<string, any>();
 
@@ -176,23 +175,7 @@ export class ComponentContainer<K extends keyof DocumentEventMap> {
             result.set(key, value);
         }
 
-        const metadata = Reflect.getMetadata(COMPONENT_METADATA_KEY, constructor) as InjectableMetadata
-
-        metadata.params?.forEach((param: { name: string, type: Function }, index: number) => {
-            const queryMetadata = Reflect.getMetadata(`${QUERY_METADATA_KEY}:${index}`, constructor) as QueryMetadata | undefined | null;
-
-            if (!queryMetadata) {
-                return;
-            }
-
-            if (!queryMetadata.selector) {
-                result.set(param.name, element);
-
-                return;
-            }
-
-            result.set(param.name, queryMetadata.multiple ? element.querySelectorAll(queryMetadata.selector) : element.querySelector(queryMetadata.selector));
-        });
+        result.set(ROOT_ELEMENT_KEY, element);
 
         return result;
     }

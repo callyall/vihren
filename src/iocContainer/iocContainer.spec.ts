@@ -1,6 +1,7 @@
 import { Component } from "../Decorators/component.decorator/component.decorator";
 import { Injectable } from "../Decorators/injectable.decorator/injectable.decorator";
 import { IocContainer } from "./IocContainer";
+import {ArgumentMetadata, argumentModifier} from "../Decorators/argumentModifier.decorator/argumentModifier.decorator";
 
 describe('IocContainer', () => {
     it('Should register a value', () => {
@@ -159,5 +160,42 @@ describe('IocContainer', () => {
         expect(instance.test1).toEqual('hello');
         expect(instance.test2).toEqual('world');
         expect(instance.service2).toBeInstanceOf(TestService3);
+    });
+
+    it('Should throw mo argument modifier function found for key test', () => {
+        @Injectable({ shared: false })
+        class Test {
+            constructor(public test: string) { }
+        }
+
+        const data = 'testMessage';
+
+        argumentModifier({ key: 'test', data }, Test, 0);
+
+        const container = new IocContainer();
+
+        expect(() => container.resolve(Test)).toThrow(`No argument modifier function found for key test`);
+    });
+
+    it('Should modify an argument', () => {
+        @Injectable({ shared: false })
+        class Test {
+            constructor(public first: string, public test: string) { }
+        }
+
+        const data = 'testMessage';
+
+        argumentModifier({ key: 'test', data }, Test, 1);
+
+        const container = new IocContainer();
+        container.registerArgumentModifier('test', (name: string, argumentMetadata: ArgumentMetadata<string>, args: Map<string, any>): Map<string, any> => {
+            args.set('test', argumentMetadata.data);
+
+            return args;
+        });
+
+        const instance = container.resolve(Test, new Map<string, any>([['first', 'test']])) as Test;
+
+        expect(instance.test).toEqual(data);
     });
 });

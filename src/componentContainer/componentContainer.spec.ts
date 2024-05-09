@@ -1,10 +1,10 @@
 import { Component } from "../Decorators/component.decorator/component.decorator";
-import { Query } from "../Decorators/query.decorator/query.decorator";
+import { Query, QUERY_METADATA_KEY, queryModifier } from "../Decorators/query.decorator/query.decorator";
 import { OnChange } from "../Interfaces/onChange.interface";
 import { OnDestroy } from "../Interfaces/onDestroy.interface";
 import { OnInit } from "../Interfaces/onInit.interface";
 import { ComponentContainer } from "./componentContainer";
-import {  Injectable  } from "../Decorators/injectable.decorator/injectable.decorator";
+import { Injectable } from "../Decorators/injectable.decorator/injectable.decorator";
 import { Event } from "../Decorators/event.decorator/event.decorator";
 import { IocContainer } from "../iocContainer/IocContainer";
 
@@ -20,6 +20,7 @@ describe('ComponentContainer', () => {
 
     const service = new TestService();
 
+    iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifier);
     iocContainer.registerValue(TestService.name, service);
 
     it('Should fail to instantiate a component container', () => {

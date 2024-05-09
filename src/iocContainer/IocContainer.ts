@@ -1,17 +1,22 @@
 import { COMPONENT_METADATA_KEY } from "../Decorators/component.decorator/component.decorator";
 import { INJECTABLE_METADATA_KEY, InjectableMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
-import { IocContainerInterface } from "../Interfaces/IocContainer.interface";
+import {FactoryFunction, IocContainerInterface, ModifierFunction} from "../Interfaces/IocContainer.interface";
+import {
+    ARGUMENT_MODIFIER_METADATA_KEY,
+    ArgumentMetadata
+} from "../Decorators/argumentModifier.decorator/argumentModifier.decorator";
 
 export class IocContainer implements IocContainerInterface {
     private values: Map<string, any> = new Map<string, any>();
-    private factories: Map<string, (args?: Map<string, any>) => any> = new Map<string, (args?: Map<string, any>) => any>();
+    private factories: Map<string, FactoryFunction<any>> = new Map<string, FactoryFunction<any>>();
+    private argumentModifiers: Map<string, ModifierFunction<any>> = new Map<string, ModifierFunction<any>>();
 
     public registerValue<T>(key: string, value: T): void {
         this.values.set(key, value);
     }
 
-    public registerFactory<T>(key: string, factory: (args?: Map<string, any>) => T): void {
-        this.factories.set(key, factory);
+    public registerFactory<T>(key: string, factoryFunction: FactoryFunction<T>): void {
+        this.factories.set(key, factoryFunction);
     }
 
     public resolve<T>(target: Function | string, args?: Map<string, any>): T {
@@ -29,8 +34,12 @@ export class IocContainer implements IocContainerInterface {
             return this.values.get(key);
         }
 
+        if (metadata && metadata.params) {
+            args = this.prepareArgs(target as Function, metadata, args ?? new Map<string, any>());
+        }
+
         if (this.factories.has(key)) {
-            const factory = this.factories.get(key) as (args?: Map<string, any>) => T;
+            const factory = this.factories.get(key) as FactoryFunction<T>;
             const instance = factory(args);
 
             if (metadata && metadata.shared) {
@@ -45,6 +54,10 @@ export class IocContainer implements IocContainerInterface {
         }
 
         return this.defaultFactory(target as Function, metadata, args);
+    }
+
+    public registerArgumentModifier<T>(key: string, modifierFunction: ModifierFunction<T>): void {
+        this.argumentModifiers.set(key, modifierFunction);
     }
 
     private defaultFactory(target: Function, metadata: InjectableMetadata | null, args?: Map<string, any>): any {
@@ -85,5 +98,31 @@ export class IocContainer implements IocContainerInterface {
         });
 
         return new target.prototype.constructor(...params);
+    }
+
+    private prepareArgs(target: Function, metadata: InjectableMetadata, args: Map<string, any>): Map<string, any> {
+        const modifierMetadata = Reflect.getMetadata(ARGUMENT_MODIFIER_METADATA_KEY, target) as Map<number, ArgumentMetadata<any>>;
+        
+        if (!modifierMetadata) {
+            return args;
+        }
+
+        metadata?.params?.forEach((param, index) => {
+            if (!modifierMetadata.has(index)) {
+                return;
+            }
+            
+            const argumentModifierMetadata = modifierMetadata.get(index) as ArgumentMetadata<any>;
+
+            if (!this.argumentModifiers.has(argumentModifierMetadata.key)) {
+                throw new Error(`No argument modifier function found for key ${argumentModifierMetadata.key}`);
+            }
+
+            const modifierFunction = this.argumentModifiers.get(argumentModifierMetadata.key) as ModifierFunction<any>;
+            
+            args = modifierFunction(param.name, argumentModifierMetadata, args);
+        });
+
+        return args;
     }
 }
