@@ -49,7 +49,7 @@ describe('ComponentContainer', () => {
                     <div class="test-component-2" data-name="tester"></div>
                 </div>
                 <div id="app3">
-                    <div class="test-component"><div>
+                    <div class="test-component-3"><div>
                 <div>
             </div>
         `;
@@ -110,21 +110,27 @@ describe('ComponentContainer', () => {
     it ('Should update a component', () => {
         document.querySelector('.test-component')?.appendChild(document.createElement('div'));
 
-        expect(service.wasChanged).toBe(true);
+        expect(service.wasChanged).toEqual(true);
     });
 
     it('Should trigger a click event', () => {
         document.getElementById('click')?.click();
 
-        expect(service.wasClicked).toBe(true);
+        expect(service.wasClicked).toEqual(true);
     });
 
     it('Should destroy a component', async () => {
-        document.querySelector('.test-component')?.remove();
+        const element = document.querySelector('.test-component');
+        const instanceId = element?.getAttribute('instance') as string;
+
+        expect(container.getComponentInstancesBySelector('.test-component')?.has(instanceId)).toEqual(true);
+
+        element?.remove();
 
         await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(service.wasDestroyed).toBe(true);
+        expect(service.wasDestroyed).toEqual(true);
+        expect(container.getComponentInstancesBySelector('.test-component')?.has(instanceId)).toEqual(false);
     });
 
     it('Should trigger invalid instance id exception', async () => {
@@ -144,8 +150,15 @@ describe('ComponentContainer', () => {
         logSpy.mockRestore();
     });
 
+    it('Should get component instances by selector', () => {
+       const componentInstances = container.getComponentInstancesBySelector('.test-component-2');
+
+       expect(componentInstances).toBeInstanceOf(Map);
+       expect(componentInstances.size).toEqual(1);
+    });
+
     it('Should destroy all components', async () => {
-        service.wasDestroyed = false;
+        //service.wasDestroyed = false;
         const rootElement = document.getElementById('app2') as HTMLElement;
         const container = new ComponentContainer(rootElement, iocContainer);
         container.registerCallbackSetupFunction(EVENT_METADATA_KEY, eventCallbackSetupFunction);
@@ -154,13 +167,14 @@ describe('ComponentContainer', () => {
         container.registerComponent(TestComponent2);
 
         rootElement.remove();
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
-        expect(service.wasDestroyed).toBe(true);
+        expect(container.getComponentInstancesBySelector('.test-component')?.size).toEqual(0);
+        expect(container.getComponentInstancesBySelector('.test-component-2')?.size).toEqual(0);
     });
 
     it('Should throw callback setup function not found for key test', () => {
-        @Component({ selector: '.test-component' })
+        @Component({ selector: '.test-component-3' })
         class OddComponent {
             public onSomething() {}
         }

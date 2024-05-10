@@ -17,7 +17,7 @@ export const Event = (args: EventMetadata) => (target: Object, propertyKey: stri
     );
 };
 
-export const eventCallbackSetupFunction: CallbackSetupFunction<EventMetadata> = (metadata: CallbackMetadata<EventMetadata>, instance: ComponentInstance, iocContainer: IocContainerInterface): Subscription => {
+export const eventCallbackSetupFunction: CallbackSetupFunction<EventMetadata> = (metadata: CallbackMetadata<EventMetadata>, instance: ComponentInstance<any>, iocContainer: IocContainerInterface): Subscription => {
     let observable = fromEvent(instance.element, metadata.data.type)
         .pipe(filter((event: Event) => (event.target as HTMLElement).matches(metadata.data.selector)));
 

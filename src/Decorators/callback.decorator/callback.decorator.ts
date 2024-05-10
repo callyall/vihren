@@ -21,4 +21,4 @@ export interface CallbackMetadata<T> {
     data: T;
 }
 
-export type CallbackSetupFunction<T> = (metadata: CallbackMetadata<T>, instance: ComponentInstance, iocContainer: IocContainerInterface) => Subscription;
+export type CallbackSetupFunction<T> = (metadata: CallbackMetadata<T>, instance: ComponentInstance<T>, iocContainer: IocContainerInterface) => Subscription;

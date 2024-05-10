@@ -1,7 +1,7 @@
 import { Subscription } from "rxjs";
 
-export interface ComponentInstance {
+export interface ComponentInstance<T extends any> {
     element: HTMLElement;
-    instance: any;
+    instance: T;
     subscriptions: Subscription[];
 }

@@ -66,7 +66,7 @@ describe('Event Decorator', () => {
            data: { type: 'click', selector: 'button', options: { debounce: 100 } }
         };
 
-        const instance: ComponentInstance = {
+        const instance: ComponentInstance<any> = {
             element: document.getElementById('component') as HTMLElement,
             instance: {
                 onClick: jest.fn()
