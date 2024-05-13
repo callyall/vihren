@@ -9,16 +9,9 @@ import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "./Decorat
 import { IocContainer } from "./iocContainer/IocContainer";
 import { CHILD_COMPONENT_METADATA_KEY, ChildComponent, childComponentModifierFunction, ChildComponentReference } from "./Decorators/childComponent.decorator/childComponent.decorator";
 
-interface InputComponentInterface {
-    isValid(): boolean;
-    getValue(): string;
-}
-
-@Component({ selector: '#email-component' })
-class EmailComponent implements InputComponentInterface {
-    public constructor(
-        @Query({ selector: 'input', multiple: false }) public input: HTMLInputElement,
-    ) {}
+@Component({ selector: '.input-component' })
+class InputComponent {
+    public constructor(@Query({ selector: 'input', multiple: false }) public input: HTMLInputElement) {}
 
     @Event({ type: 'keyup', selector: 'input', options: { debounce: 100 } })
     public keyup(): void {
@@ -33,33 +26,10 @@ class EmailComponent implements InputComponentInterface {
     }
 
     public isValid(): boolean {
-        return this.getValue().includes('@');
-    }
-
-    public getValue(): string {
-        return this.input.value;
-    }
-}
-
-@Component({ selector: '#password-component' })
-class PasswordComponent implements InputComponentInterface {
-    public constructor(
-        @Query({ selector: 'input', multiple: false }) public input: HTMLInputElement,
-    ) {}
-
-    @Event({ type: 'keyup', selector: 'input', options: { debounce: 100 } })
-    public keyup(): void {
-        if (this.isValid()) {
-            this.input.classList.remove('is-invalid');
-            return;
+        if (this.input.type === 'email') {
+            return this.getValue().includes('@');
         }
 
-        if (!this.input.classList.contains('is-invalid')) {
-            this.input.classList.add('is-invalid');
-        }
-    }
-
-    public isValid(): boolean {
         return this.getValue().length > 5;
     }
 
@@ -71,8 +41,8 @@ class PasswordComponent implements InputComponentInterface {
 @Component({ selector: '#form-component' })
 class FormComponent implements OnDestroy {
     public constructor(
-        @ChildComponent({ selector: '#email-component' }) public emailComponent: ChildComponentReference<EmailComponent>,
-        @ChildComponent({ selector: '#password-component' }) public passwordComponent: ChildComponentReference<PasswordComponent>,
+        @ChildComponent({ selector: '#email-component', componentSelector: '.input-component' }) public emailComponent: ChildComponentReference<InputComponent>,
+        @ChildComponent({ selector: '#password-component', componentSelector: '.input-component' }) public passwordComponent: ChildComponentReference<InputComponent>,
         @Query({ selector: '#submit', multiple: false }) public submitButton: HTMLButtonElement,
     ) {}
 
@@ -166,8 +136,7 @@ window.onload = function () {
 
     const componentContainer = new ComponentContainer(document.getElementById('app') as HTMLElement, iocContainer);
     componentContainer.registerCallbackSetupFunction(EVENT_METADATA_KEY, eventCallbackSetupFunction);
-    componentContainer.registerComponent(EmailComponent);
-    componentContainer.registerComponent(PasswordComponent);
+    componentContainer.registerComponent(InputComponent);
     componentContainer.registerComponent(FormComponent);
     componentContainer.registerComponent(CounterComponent);
 }

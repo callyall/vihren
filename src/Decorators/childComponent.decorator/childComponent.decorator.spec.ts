@@ -36,7 +36,7 @@ describe('ChildComponentDecorator', () => {
             childComponentModifierFunction(
                 {
                     key: CHILD_COMPONENT_METADATA_KEY,
-                    data: {selector: 'test', parameterIndex: 0}
+                    data: {selector: 'test', parameterIndex: 0, componentSelector: 'test' }
                 },
                 {
                     name: 'test',
@@ -50,7 +50,7 @@ describe('ChildComponentDecorator', () => {
             childComponentModifierFunction(
                 {
                     key: CHILD_COMPONENT_METADATA_KEY,
-                    data: {selector: 'test', parameterIndex: 0}
+                    data: {selector: 'test', parameterIndex: 0, componentSelector: 'test' }
                 },
                 {
                     name: 'test',
@@ -66,7 +66,7 @@ describe('ChildComponentDecorator', () => {
             childComponentModifierFunction(
                 {
                     key: CHILD_COMPONENT_METADATA_KEY,
-                    data: {selector: 'test', parameterIndex: 0}
+                    data: {selector: 'test', parameterIndex: 0, componentSelector: 'test' }
                 },
                 {
                     name: 'test',
@@ -80,7 +80,7 @@ describe('ChildComponentDecorator', () => {
             childComponentModifierFunction(
                 {
                     key: CHILD_COMPONENT_METADATA_KEY,
-                    data: {selector: 'test', parameterIndex: 0}
+                    data: {selector: 'test', parameterIndex: 0, componentSelector: 'test'}
                 },
                 {
                     name: 'test',
@@ -128,6 +128,7 @@ describe('ChildComponentDecorator', () => {
                 key: CHILD_COMPONENT_METADATA_KEY,
                 data: {
                     selector: '.child',
+                    componentSelector: '.child',
                     parameterIndex: 0
                 }
             },
@@ -147,6 +148,7 @@ describe('ChildComponentDecorator', () => {
                 key: CHILD_COMPONENT_METADATA_KEY,
                 data: {
                     selector: '.child',
+                    componentSelector: '.child',
                     parameterIndex: 0
                 }
             },
@@ -170,14 +172,14 @@ describe('ChildComponentDecorator', () => {
 
         expect(() => {
             document.body.innerHTML= `<div id="component"></div>`;
-            const reference = new ChildComponentReference(document.getElementById('component') as HTMLElement, '.child', componentContainer);
+            const reference = new ChildComponentReference(document.getElementById('component') as HTMLElement, '.child', '.child', componentContainer);
 
             reference.get();
         }).toThrow('Element with selector .child not found');
 
         expect(() => {
             document.body.innerHTML= `<div id="component"><div class="child"></div></div>`;
-            const reference = new ChildComponentReference(document.getElementById('component') as HTMLElement, '.child', componentContainer);
+            const reference = new ChildComponentReference(document.getElementById('component') as HTMLElement, '.child', '.child', componentContainer);
 
             reference.get();
         }).toThrow('Instance id not found');
@@ -196,7 +198,7 @@ describe('ChildComponentDecorator', () => {
             subscriptions: [],
         });
 
-        const reference = new ChildComponentReference(document.getElementById('component') as HTMLElement, '.child', componentContainer);
+        const reference = new ChildComponentReference(document.getElementById('component') as HTMLElement, '.child', '.child', componentContainer);
 
         expect(reference.get()).toBeDefined();
     });
@@ -209,14 +211,14 @@ describe('ChildComponentDecorator', () => {
 
         expect(() => {
             document.body.innerHTML= `<div id="component"></div>`;
-            const reference = new ChildComponentCollection(document.getElementById('component') as HTMLElement, '.child', componentContainer);
+            const reference = new ChildComponentCollection(document.getElementById('component') as HTMLElement, '.child', '.child', componentContainer);
 
             reference.get();
         }).toThrow('Element with selector .child not found');
 
         expect(() => {
             document.body.innerHTML= `<div id="component"><div class="child"></div></div>`;
-            const reference = new ChildComponentCollection(document.getElementById('component') as HTMLElement, '.child', componentContainer);
+            const reference = new ChildComponentCollection(document.getElementById('component') as HTMLElement, '.child', '.child', componentContainer);
 
             reference.get();
         }).toThrow('Instance id not found');
@@ -224,7 +226,7 @@ describe('ChildComponentDecorator', () => {
         expect(() => {
             document.body.innerHTML = `<div id="component"><div class="child" instance="NOPE"></div></div>`;
 
-            const reference = new ChildComponentCollection(document.getElementById('component') as HTMLElement, '.child', componentContainer);
+            const reference = new ChildComponentCollection(document.getElementById('component') as HTMLElement, '.child', '.child', componentContainer);
 
             reference.get();
         }).toThrow('Instance for element <div class="child" instance="NOPE"></div> not found')
@@ -243,7 +245,7 @@ describe('ChildComponentDecorator', () => {
             subscriptions: [],
         });
 
-        const reference = new ChildComponentCollection(document.getElementById('component') as HTMLElement, '.child', componentContainer);
+        const reference = new ChildComponentCollection(document.getElementById('component') as HTMLElement, '.child', '.child', componentContainer);
 
         expect(reference.get()).toBeDefined();
     });

@@ -13,6 +13,7 @@ export const ChildComponent = (args: ChildComponentMetadataInput) => (target: Fu
         key: CHILD_COMPONENT_METADATA_KEY,
         data: {
             selector: args.selector,
+            componentSelector: args.componentSelector ?? args.selector,
             parameterIndex,
         },
     };
@@ -32,23 +33,23 @@ export const childComponentModifierFunction: ModifierFunction<ChildComponentMeta
     const rootElement = args.get(ROOT_ELEMENT_KEY) as HTMLElement;
     const componentContainer = args.get(ComponentContainer.COMPONENT_CONTAINER_KEY) as ComponentContainer;
 
-    args.set(paramMetadata.name, constructReference(paramMetadata.type === ChildComponentCollection, argumentMetadata.data.selector, rootElement, componentContainer));
+    args.set(paramMetadata.name, constructReference(paramMetadata.type === ChildComponentCollection, argumentMetadata.data.selector, argumentMetadata.data.componentSelector, rootElement, componentContainer));
 
     return args;
 }
 
-const constructReference = (multiple: boolean, selector: string, rootElement: HTMLElement, componentContainer: ComponentContainer): AbstractComponentReference<any> => {
+const constructReference = (multiple: boolean, selector: string, componentSelector: string, rootElement: HTMLElement, componentContainer: ComponentContainer): AbstractComponentReference<any> => {
     if (multiple) {
-        return new ChildComponentCollection(rootElement, selector, componentContainer);
+        return new ChildComponentCollection(rootElement, selector, componentSelector, componentContainer);
     }
 
     return multiple
-        ? new ChildComponentCollection(rootElement, selector, componentContainer)
-        : new ChildComponentReference(rootElement, selector, componentContainer);
+        ? new ChildComponentCollection(rootElement, selector, componentSelector, componentContainer)
+        : new ChildComponentReference(rootElement, selector, componentSelector, componentContainer);
 }
 
 abstract class AbstractComponentReference<T> {
-    protected constructor(protected rootElement: HTMLElement, protected selector: string, protected componentContainer: ComponentContainer) {}
+    protected constructor(protected rootElement: HTMLElement, protected selector: string, protected componentSelector: string, protected componentContainer: ComponentContainer) {}
 
     protected getComponentInstance(element: HTMLElement): ComponentInstance<T> | undefined {
         const instanceId = element.getAttribute('instance');
@@ -57,15 +58,15 @@ abstract class AbstractComponentReference<T> {
             throw new Error('Instance id not found');
         }
 
-        const instances = this.componentContainer.getComponentInstancesBySelector(this.selector);
+        const instances = this.componentContainer.getComponentInstancesBySelector(this.componentSelector);
 
         return instances.get(instanceId);
     }
 }
 
 export class ChildComponentReference<T> extends AbstractComponentReference<T> {
-    public constructor(protected rootElement: HTMLElement, protected selector: string, protected componentContainer: ComponentContainer) {
-        super(rootElement, selector, componentContainer);
+    public constructor(protected rootElement: HTMLElement, protected selector: string, protected componentSelector: string, protected componentContainer: ComponentContainer) {
+        super(rootElement, selector, componentSelector, componentContainer);
     }
 
     public get(): ComponentInstance<T> | undefined {
@@ -80,8 +81,8 @@ export class ChildComponentReference<T> extends AbstractComponentReference<T> {
 }
 
 export class ChildComponentCollection<T> extends AbstractComponentReference<T> {
-    public constructor(protected rootElement: HTMLElement, protected selector: string, protected componentContainer: ComponentContainer) {
-        super(rootElement, selector, componentContainer);
+    public constructor(protected rootElement: HTMLElement, protected selector: string, protected componentSelector: string, protected componentContainer: ComponentContainer) {
+        super(rootElement, selector, componentSelector, componentContainer);
     }
 
     public get(): ComponentInstance<T>[] {
@@ -105,9 +106,10 @@ export class ChildComponentCollection<T> extends AbstractComponentReference<T> {
 
 export interface ChildComponentMetadataInput {
     selector: string;
+    componentSelector?: string;
 }
 
-export interface ChildComponentMetadata {
-    selector: string;
+export interface ChildComponentMetadata extends ChildComponentMetadataInput {
+    componentSelector: string;
     parameterIndex: number;
 }
