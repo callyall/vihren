@@ -7,7 +7,7 @@ import { Observable, Subscription, interval, map } from "rxjs";
 import { Injectable } from "./Decorators/injectable.decorator/injectable.decorator";
 import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "./Decorators/event.decorator/event.decorator";
 import { IocContainer } from "./iocContainer/IocContainer";
-import { CHILD_COMPONENT_METADATA_KEY, ChildComponent, childComponentModifierFunction, ChildComponentReference } from "./Decorators/childComponent.decorator/childComponent.decorator";
+import { CHILD_COMPONENT_METADATA_KEY, ChildComponent, ChildComponentCollection, childComponentModifierFunction, ChildComponentReference } from "./Decorators/childComponent.decorator/childComponent.decorator";
 
 @Component({ selector: '.input-component' })
 class InputComponent {
@@ -41,13 +41,16 @@ class InputComponent {
 @Component({ selector: '#form-component' })
 class FormComponent implements OnDestroy {
     public constructor(
-        @ChildComponent({ selector: '#email-component', componentSelector: '.input-component' }) public emailComponent: ChildComponentReference<InputComponent>,
-        @ChildComponent({ selector: '#password-component', componentSelector: '.input-component' }) public passwordComponent: ChildComponentReference<InputComponent>,
-        @Query({ selector: '#submit', multiple: false }) public submitButton: HTMLButtonElement,
+        // @ChildComponent({ selector: '#email-component', componentSelector: '.input-component' }) private emailComponent: ChildComponentReference<InputComponent>,
+        // @ChildComponent({ selector: '#password-component', componentSelector: '.input-component' }) private passwordComponent: ChildComponentReference<InputComponent>,
+        @ChildComponent({ selector: '.input-component' }) private inputs: ChildComponentCollection<InputComponent>,
+        @Query({ selector: '#submit', multiple: false }) private submitButton: HTMLButtonElement,
     ) {}
 
     private isValid(): boolean {
-        return !!(this.emailComponent.get()?.instance.isValid() && this.passwordComponent.get()?.instance.isValid());
+        return this.inputs.get().map((input) => input.instance.isValid()).reduce((acc, curr) => acc && curr, true);
+
+        // return !!(this.emailComponent.get()?.instance.isValid() && this.passwordComponent.get()?.instance.isValid());
     }
 
     @Event({ type: 'click', selector: '#submit' })

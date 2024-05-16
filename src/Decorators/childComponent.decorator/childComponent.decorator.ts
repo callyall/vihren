@@ -65,7 +65,7 @@ abstract class AbstractComponentReference<T> {
 }
 
 export class ChildComponentReference<T> extends AbstractComponentReference<T> {
-    public constructor(protected rootElement: HTMLElement, protected selector: string, protected componentSelector: string, protected componentContainer: ComponentContainer) {
+    public constructor(rootElement: HTMLElement, selector: string, componentSelector: string, componentContainer: ComponentContainer) {
         super(rootElement, selector, componentSelector, componentContainer);
     }
 
@@ -81,7 +81,7 @@ export class ChildComponentReference<T> extends AbstractComponentReference<T> {
 }
 
 export class ChildComponentCollection<T> extends AbstractComponentReference<T> {
-    public constructor(protected rootElement: HTMLElement, protected selector: string, protected componentSelector: string, protected componentContainer: ComponentContainer) {
+    public constructor(rootElement: HTMLElement, selector: string, componentSelector: string, componentContainer: ComponentContainer) {
         super(rootElement, selector, componentSelector, componentContainer);
     }
 

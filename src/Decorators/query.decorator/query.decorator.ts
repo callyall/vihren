@@ -93,8 +93,7 @@ export interface QueryInputMetadata {
     multiple?: boolean;
 }
 
-export interface QueryMetadata {
-    selector?: string;
+export interface QueryMetadata extends QueryInputMetadata{
     multiple: boolean;
     parameterIndex: number;
 }
