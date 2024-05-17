@@ -2,7 +2,7 @@ import { ROOT_ELEMENT_KEY } from "../query.decorator/query.decorator";
 import { CHILD_COMPONENT_METADATA_KEY, ChildComponent, ChildComponentCollection, ChildComponentMetadata, childComponentModifierFunction, ChildComponentReference } from "./childComponent.decorator";
 import { ARGUMENT_MODIFIER_METADATA_KEY, ArgumentMetadata } from "../argumentModifier.decorator/argumentModifier.decorator";
 import { ComponentContainer } from "../../componentContainer/componentContainer";
-import { ComponentInstance } from "../../Interfaces/componentInstance.interface";
+import { ComponentInstance } from "../../interfaces/componentInstance.interface";
 
 describe('ChildComponentDecorator', () => {
     class TestComponent {

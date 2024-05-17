@@ -1,7 +1,7 @@
 import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction, EventMetadata } from './event.decorator';
 import 'reflect-metadata';
 import { CALLBACK_METADATA_KEY, CallbackMetadata } from "../callback.decorator/callback.decorator";
-import { ComponentInstance } from "../../Interfaces/componentInstance.interface";
+import { ComponentInstance } from "../../interfaces/componentInstance.interface";
 import { IocContainer } from "../../iocContainer/IocContainer";
 import { Subscription } from "rxjs";
 
@@ -57,7 +57,7 @@ describe('Event Decorator', () => {
             });
     });
 
-    it('Should setup event', async () => {
+    it('Should setup event', done => {
         document.body.innerHTML = `<div id="component"><button></button></div>`;
 
         const metadata: CallbackMetadata<EventMetadata> = {
@@ -69,7 +69,10 @@ describe('Event Decorator', () => {
         const instance: ComponentInstance<any> = {
             element: document.getElementById('component') as HTMLElement,
             instance: {
-                onClick: jest.fn()
+                onClick: jest.fn(() => {
+                    expect(true).toBeTruthy();
+                    done();
+                })
             },
             subscriptions: []
         };
@@ -79,9 +82,5 @@ describe('Event Decorator', () => {
         expect(eventCallbackSetupFunction(metadata, instance, iocContainer)).toBeInstanceOf(Subscription);
 
         document.querySelector('button')?.click();
-        // Simulate debounce
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        expect(instance.instance.onClick).toHaveBeenCalled();
     });
 });

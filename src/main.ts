@@ -1,21 +1,30 @@
-import { Component } from "./Decorators/component.decorator/component.decorator";
-import { OnDestroy } from "./Interfaces/onDestroy.interface";
-import { OnInit } from "./Interfaces/onInit.interface";
+import { Component } from "./decorators/component.decorator/component.decorator";
+import { OnDestroy } from "./interfaces/onDestroy.interface";
+import { OnInit } from "./interfaces/onInit.interface";
 import { ComponentContainer } from "./componentContainer/componentContainer";
-import { Query, QUERY_METADATA_KEY, queryModifierFunction } from "./Decorators/query.decorator/query.decorator";
+import { Query, QUERY_METADATA_KEY, queryModifierFunction } from "./decorators/query.decorator/query.decorator";
 import { Observable, Subscription, interval, map } from "rxjs";
-import { Injectable } from "./Decorators/injectable.decorator/injectable.decorator";
-import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "./Decorators/event.decorator/event.decorator";
+import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "./decorators/event.decorator/event.decorator";
 import { IocContainer } from "./iocContainer/IocContainer";
-import { CHILD_COMPONENT_METADATA_KEY, ChildComponent, ChildComponentCollection, childComponentModifierFunction, ChildComponentReference } from "./Decorators/childComponent.decorator/childComponent.decorator";
+import { CHILD_COMPONENT_METADATA_KEY, ChildComponent, ChildComponentCollection, childComponentModifierFunction, ChildComponentReference } from "./decorators/childComponent.decorator/childComponent.decorator";
+import { Injectable } from "./decorators/injectable.decorator/injectable.decorator";
+import { COMPONENT_EVENT_METADATA_KEY, ComponentEvent, componentEventCallbackSetupFunction } from "./decorators/componentEvent.decorator/componentEvent.decorator";
+import { ComponentEventEmitter, ComponentEventPayload } from "./services/eventEmitter/componentEventEmitter";
 
 @Component({ selector: '.input-component' })
 class InputComponent {
-    public constructor(@Query({ selector: 'input', multiple: false }) public input: HTMLInputElement) {}
+    public constructor(
+        @Query({ selector: 'input', multiple: false }) public input: HTMLInputElement,
+        private eventEmitter: ComponentEventEmitter,
+    ) {}
 
     @Event({ type: 'keyup', selector: 'input', options: { debounce: 100 } })
     public keyup(): void {
-        if (this.isValid()) {
+        const isValid = this.isValid();
+
+        this.eventEmitter.emit<string, boolean>('inputValidation', { source: this.input.type, data: isValid });
+
+        if (isValid) {
             this.input.classList.remove('is-invalid');
             return;
         }
@@ -25,7 +34,7 @@ class InputComponent {
         }
     }
 
-    public isValid(): boolean {
+    private isValid(): boolean {
         if (this.input.type === 'email') {
             return this.getValue().includes('@');
         }
@@ -40,17 +49,19 @@ class InputComponent {
 
 @Component({ selector: '#form-component' })
 class FormComponent implements OnDestroy {
+    private inputValidity: Map<string, boolean> = new Map<string, boolean>([['email', false], ['password', false]]);
+
     public constructor(
         // @ChildComponent({ selector: '#email-component', componentSelector: '.input-component' }) private emailComponent: ChildComponentReference<InputComponent>,
         // @ChildComponent({ selector: '#password-component', componentSelector: '.input-component' }) private passwordComponent: ChildComponentReference<InputComponent>,
         @ChildComponent({ selector: '.input-component' }) private inputs: ChildComponentCollection<InputComponent>,
         @Query({ selector: '#submit', multiple: false }) private submitButton: HTMLButtonElement,
-    ) {}
+    ) {
+        this.submitButton.disabled = true;
+    }
 
     private isValid(): boolean {
-        return this.inputs.get().map((input) => input.instance.isValid()).reduce((acc, curr) => acc && curr, true);
-
-        // return !!(this.emailComponent.get()?.instance.isValid() && this.passwordComponent.get()?.instance.isValid());
+        return Array.from(this.inputValidity.values()).reduce((acc, curr) => acc && curr, true);
     }
 
     @Event({ type: 'click', selector: '#submit' })
@@ -71,11 +82,23 @@ class FormComponent implements OnDestroy {
         document.getElementById('app')?.prepend(div);
     }
 
+    @ComponentEvent({ type: 'inputValidation' })
+    public onValidate(payload: ComponentEventPayload<string, boolean>): void {
+        this.inputValidity.set(payload.source, payload.data);
+
+        if (this.isValid()) {
+            this.submitButton.disabled = false;
+            return;
+        }
+
+        this.submitButton.disabled = true;
+    }
+
     public onDestroy(): void {
         const div = document.createElement('div');
         div.innerHTML = `
           <h1>You are logged in</h1>
-          <p>Lorem ipsum...</p>
+          <p>${this.inputs.get()[0].instance.getValue()} - ${this.inputs.get()[1].instance.getValue()}</p>
         `;
 
         div.classList.add('row', 'mt-4', 'p-5', 'bg-primary', 'text-white', 'rounded', 'justify-content-center');
@@ -135,10 +158,12 @@ window.onload = function () {
     const iocContainer = new IocContainer();
     iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifierFunction);
     iocContainer.registerArgumentModifier(CHILD_COMPONENT_METADATA_KEY, childComponentModifierFunction);
+    iocContainer.registerValue(ComponentEventEmitter.name, new ComponentEventEmitter());
     iocContainer.registerValue(CounterService.name, new CounterService());
 
     const componentContainer = new ComponentContainer(document.getElementById('app') as HTMLElement, iocContainer);
     componentContainer.registerCallbackSetupFunction(EVENT_METADATA_KEY, eventCallbackSetupFunction);
+    componentContainer.registerCallbackSetupFunction(COMPONENT_EVENT_METADATA_KEY, componentEventCallbackSetupFunction);
     componentContainer.registerComponent(InputComponent);
     componentContainer.registerComponent(FormComponent);
     componentContainer.registerComponent(CounterComponent);

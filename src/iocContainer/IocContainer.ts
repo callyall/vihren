@@ -1,7 +1,7 @@
-import { COMPONENT_METADATA_KEY } from "../Decorators/component.decorator/component.decorator";
-import { INJECTABLE_METADATA_KEY, InjectableMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
-import { FactoryFunction, IocContainerInterface, ModifierFunction } from "../Interfaces/IocContainer.interface";
-import { ARGUMENT_MODIFIER_METADATA_KEY, ArgumentMetadata } from "../Decorators/argumentModifier.decorator/argumentModifier.decorator";
+import { COMPONENT_METADATA_KEY } from "../decorators/component.decorator/component.decorator";
+import { INJECTABLE_METADATA_KEY, InjectableMetadata } from "../decorators/injectable.decorator/injectable.decorator";
+import { FactoryFunction, IocContainerInterface, ModifierFunction } from "../interfaces/IocContainer.interface";
+import { ARGUMENT_MODIFIER_METADATA_KEY, ArgumentMetadata } from "../decorators/argumentModifier.decorator/argumentModifier.decorator";
 
 export class IocContainer implements IocContainerInterface {
     private values: Map<string, any> = new Map<string, any>();
@@ -16,9 +16,14 @@ export class IocContainer implements IocContainerInterface {
         this.factories.set(key, factoryFunction);
     }
 
-    public resolve<T>(target: Function | string, args?: Map<string, any>): T {
+    public resolve<T>(target: Function | string, args?: Map<string, any>, failIfNoShared: boolean = false): T {
         const isClass = target instanceof Function;
         const key = isClass ? target.name : target;
+
+        if (failIfNoShared && !this.values.has(key)) {
+            throw new Error(`No shared instance found for key ${key}`);
+        }
+
         const metadata = isClass
             ? (Reflect.getMetadata(INJECTABLE_METADATA_KEY, target) ?? Reflect.getMetadata(COMPONENT_METADATA_KEY, target)) as InjectableMetadata
             : null;

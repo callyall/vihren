@@ -1,7 +1,7 @@
-import { Component } from "../Decorators/component.decorator/component.decorator";
-import { Injectable, ParamMetadata } from "../Decorators/injectable.decorator/injectable.decorator";
+import { Component } from "../decorators/component.decorator/component.decorator";
+import { Injectable, ParamMetadata } from "../decorators/injectable.decorator/injectable.decorator";
 import { IocContainer } from "./IocContainer";
-import { ArgumentMetadata, argumentModifier } from "../Decorators/argumentModifier.decorator/argumentModifier.decorator";
+import { ArgumentMetadata, argumentModifier } from "../decorators/argumentModifier.decorator/argumentModifier.decorator";
 
 describe('IocContainer', () => {
     it('Should register a value', () => {
@@ -197,5 +197,11 @@ describe('IocContainer', () => {
         const instance = container.resolve(Test, new Map<string, any>([['first', 'test']])) as Test;
 
         expect(instance.test).toEqual(data);
+    });
+
+    it('Should modify an argument with multiple arguments', () => {
+        const container = new IocContainer();
+
+        expect(() => container.resolve('Test', undefined, true)).toThrow('No shared instance found for key Test');
     });
 });

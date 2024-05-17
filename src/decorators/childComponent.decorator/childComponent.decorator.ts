@@ -1,7 +1,7 @@
 import { ComponentContainer } from "../../componentContainer/componentContainer";
-import { ComponentInstance } from "../../Interfaces/componentInstance.interface";
+import { ComponentInstance } from "../../interfaces/componentInstance.interface";
 import { ArgumentMetadata, argumentModifier } from "../argumentModifier.decorator/argumentModifier.decorator";
-import { ModifierFunction } from "../../Interfaces/IocContainer.interface";
+import { ModifierFunction } from "../../interfaces/IocContainer.interface";
 import { ParamMetadata } from "../injectable.decorator/injectable.decorator";
 import { ROOT_ELEMENT_KEY } from "../query.decorator/query.decorator";
 

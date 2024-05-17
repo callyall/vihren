@@ -1,5 +1,5 @@
 import { ArgumentMetadata, argumentModifier } from "../argumentModifier.decorator/argumentModifier.decorator";
-import { ModifierFunction } from "../../Interfaces/IocContainer.interface";
+import { ModifierFunction } from "../../interfaces/IocContainer.interface";
 import { ParamMetadata } from "../injectable.decorator/injectable.decorator";
 
 export const ROOT_ELEMENT_KEY = 'rootElement';

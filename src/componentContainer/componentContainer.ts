@@ -1,14 +1,14 @@
 import { Observable, Subscription } from "rxjs";
-import { Mutation, MutationType } from "../Interfaces/mutation.interface";
-import { ComponentData } from "../Interfaces/componentData.interface";
-import { COMPONENT_METADATA_KEY, ComponentMetadata, LifecycleHook } from "../Decorators/component.decorator/component.decorator";
-import { OnInit } from "../Interfaces/onInit.interface";
-import { OnDestroy } from "../Interfaces/onDestroy.interface";
-import { OnChange } from "../Interfaces/onChange.interface";
-import { ComponentInstance } from "../Interfaces/componentInstance.interface";
-import { ROOT_ELEMENT_KEY } from "../Decorators/query.decorator/query.decorator";
-import { IocContainerInterface } from "../Interfaces/IocContainer.interface";
-import { CALLBACK_METADATA_KEY, CallbackSetupFunction } from "../Decorators/callback.decorator/callback.decorator";
+import { Mutation, MutationType } from "../interfaces/mutation.interface";
+import { ComponentData } from "../interfaces/componentData.interface";
+import { COMPONENT_METADATA_KEY, ComponentMetadata, LifecycleHook } from "../decorators/component.decorator/component.decorator";
+import { OnInit } from "../interfaces/onInit.interface";
+import { OnDestroy } from "../interfaces/onDestroy.interface";
+import { OnChange } from "../interfaces/onChange.interface";
+import { ComponentInstance } from "../interfaces/componentInstance.interface";
+import { ROOT_ELEMENT_KEY } from "../decorators/query.decorator/query.decorator";
+import { IocContainerInterface } from "../interfaces/IocContainer.interface";
+import { CALLBACK_METADATA_KEY, CallbackSetupFunction } from "../decorators/callback.decorator/callback.decorator";
 
 export class ComponentContainer {
     public static readonly COMPONENT_CONTAINER_KEY = 'componentContainer';

@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { Subscription } from "rxjs";
-import { IocContainerInterface } from "../../Interfaces/IocContainer.interface";
-import { ComponentInstance } from "../../Interfaces/componentInstance.interface";
+import { IocContainerInterface } from "../../interfaces/IocContainer.interface";
+import { ComponentInstance } from "../../interfaces/componentInstance.interface";
 
 export const CALLBACK_METADATA_KEY = 'method:callback';
 

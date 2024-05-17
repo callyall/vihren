@@ -1,13 +1,13 @@
-import { Component } from "../Decorators/component.decorator/component.decorator";
-import { Query, QUERY_METADATA_KEY, queryModifierFunction } from "../Decorators/query.decorator/query.decorator";
-import { OnChange } from "../Interfaces/onChange.interface";
-import { OnDestroy } from "../Interfaces/onDestroy.interface";
-import { OnInit } from "../Interfaces/onInit.interface";
+import { Component } from "../decorators/component.decorator/component.decorator";
+import { Query, QUERY_METADATA_KEY, queryModifierFunction } from "../decorators/query.decorator/query.decorator";
+import { OnChange } from "../interfaces/onChange.interface";
+import { OnDestroy } from "../interfaces/onDestroy.interface";
+import { OnInit } from "../interfaces/onInit.interface";
 import { ComponentContainer } from "./componentContainer";
-import { Injectable } from "../Decorators/injectable.decorator/injectable.decorator";
-import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "../Decorators/event.decorator/event.decorator";
+import { Injectable } from "../decorators/injectable.decorator/injectable.decorator";
+import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "../decorators/event.decorator/event.decorator";
 import { IocContainer } from "../iocContainer/IocContainer";
-import { callback } from "../Decorators/callback.decorator/callback.decorator";
+import { callback } from "../decorators/callback.decorator/callback.decorator";
 
 describe('ComponentContainer', () => {
     const iocContainer = new IocContainer();

@@ -1,7 +1,7 @@
 import { callback, CallbackMetadata, CallbackSetupFunction } from "../callback.decorator/callback.decorator";
-import { IocContainerInterface } from "../../Interfaces/IocContainer.interface";
+import { IocContainerInterface } from "../../interfaces/IocContainer.interface";
 import { debounce, filter, fromEvent, interval, Subscription } from "rxjs";
-import { ComponentInstance } from "../../Interfaces/componentInstance.interface";
+import { ComponentInstance } from "../../interfaces/componentInstance.interface";
 
 export const EVENT_METADATA_KEY = 'method:event';
 

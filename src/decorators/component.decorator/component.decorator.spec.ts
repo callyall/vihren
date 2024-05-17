@@ -1,7 +1,7 @@
 import { COMPONENT_METADATA_KEY, Component, ComponentMetadata, LifecycleHook } from "./component.decorator";
-import { OnChange } from "../../Interfaces/onChange.interface";
-import { OnDestroy } from "../../Interfaces/onDestroy.interface";
-import { OnInit } from "../../Interfaces/onInit.interface";
+import { OnChange } from "../../interfaces/onChange.interface";
+import { OnDestroy } from "../../interfaces/onDestroy.interface";
+import { OnInit } from "../../interfaces/onInit.interface";
 
 describe('Component Decorator', () => {
     [
