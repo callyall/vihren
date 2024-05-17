@@ -133,21 +133,20 @@ describe('ComponentContainer', () => {
         expect(container.getComponentInstancesBySelector('.test-component')?.has(instanceId)).toEqual(false);
     });
 
-    it('Should trigger invalid instance id exception', async () => {
+    it('Should trigger invalid instance id exception', done => {
         const logSpy = jest.spyOn(global.console, 'error');
+
+        logSpy.mockImplementation((e) => {
+            expect(e).toContain('Invalid instance id 20 for component .test-component-2');
+
+            logSpy.mockRestore();
+            done();
+        });
 
         const div = document.createElement('div');
         div.classList.add('test-component-2');
         div.setAttribute('instance', '20');
         rootElement.appendChild(div);
-
-        await new Promise((resolve) => setTimeout(resolve, 0));
-
-        expect(logSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Invalid instance id 20 for component .test-component-2')
-        );
-
-        logSpy.mockRestore();
     });
 
     it('Should get component instances by selector', () => {
