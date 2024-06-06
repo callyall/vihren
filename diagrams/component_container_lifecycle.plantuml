@@ -1,0 +1,38 @@
+@startuml
+title __Component Container Lifecycle__
+start
+:Mutation observer starts listening on the root element;
+repeat :**DOM change happens**;
+switch (changeType)
+case (Element Removed)
+  :**Element Removed**;
+  if (**is the root element?**) then(yes)
+    :Stop listening for changes;
+    :Clean up any event handlers and intervals;
+    :Call **onDestroy** on the component instances that implement **OnDestroy**;
+    end
+  endif
+  switch (element)
+  case ()
+    :**Root element of a component**;
+    :Clean up any event handlers and intervals attached to the component;
+    :Call **onDestroy** on the component instance if it implements **OnDestroy**;
+    :Remove the instance from the instance list;
+  case ()
+    :**Default**;
+    :Find the components that contain it;
+    :Call **onChange** on them if they implement **OnChange**;
+  endswitch
+case (Element Added)
+  :**Element Added**;
+  :If element matches any of the registered component selectors instantiate a component for it;
+  :Find the components that contain it;
+  :Call **onChange** on them if they implement **OnChange**;
+case (Element Updated)
+  :**Element Updated**;
+  :Find the components that contain it;
+  :Call **onChange** on them if they implement **OnChange**;
+endswitch
+repeat while ()
+end
+@enduml

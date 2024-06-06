@@ -1,0 +1,236 @@
+@startuml
+title __Application Architecture__
+
+interface ParamMetadata {
+    + name: **string**
+    + type: **Function**
+}
+
+interface ArgumentMetadata<T> {
+    + key: **string**
+    + data: **T**
+}
+
+interface FactoryFunction<T> {
+    (args?: **Map<string, any>**) => **T**
+}
+
+interface ModifierFunction<T> {
+    (argumentMetadata: **ArgumentMetadata<T>**, paramMetadata: **ParamMetadata**, args: **Map<string, any>**) => **Map<string, any>**
+}
+
+ModifierFunction *-- ArgumentMetadata
+ModifierFunction *-- ParamMetadata
+
+interface IocContainerInterface {
+    + **registerValue<T>**(key: **string**, value: **T**): **void*
+    + **registerFactory<T>**(key: **string**, factoryFunction: **FactoryFunction<T>**): **void**
+    + **resolve<T>**(target: **Function | string**, args?: **Map<string, any>**, failIfNoShared?: **boolean**): **T**
+    + **registerArgumentModifier<T>**(key: **string**, modifierFunction: **ModifierFunction<T>**): **void**
+}
+
+IocContainerInterface *-- FactoryFunction
+IocContainerInterface *-- ModifierFunction
+
+class IocContainer implements IocContainerInterface {
+    - values: **Map<string, any>**
+    - factories: **Map<string, FactoryFunction<any>>**
+    - argumentModifiers: **Map<string, ModifierFunction<any>>**
+    - **defaultFactory**(target: **Function**, metadata: **InjectableMetadata**, args?: **Map<string, any>**): **Map<string,any>**
+    - **prepareArgs**(target: **Function**, metadata: **InjectableMetadata**, args: **Map<string, any>**): **Map<string, any>**
+}
+
+interface InjectableMetadataInput {
+    + shared: **boolean**
+}
+
+interface InjectableMetadata extends InjectableMetadataInput {
+    + params?: **ParamMetadata[]**
+}
+
+InjectableMetadata *-- ParamMetadata
+
+enum LifecycleHook {
+    **OnInit**    = 'onInit'
+    **OnChange**  = 'onChange'
+    **OnDestroy** = 'onDestroy'
+}
+
+interface ComponentMetadataInput {
+    + selector: **string**
+}
+
+interface ComponentMetadata extends InjectableMetadata, ComponentMetadataInput {
+    + lifecycleHooks: **LifecycleHook[]**
+}
+
+ComponentMetadata *-- LifecycleHook
+
+interface CallbackMetadata<T> {
+    + callback: **string**,
+    + key: **string**
+    + data: **T**
+}
+
+interface ComponentData {
+    + constructor: **Function**
+    + metadata: **ComponentMetadata**
+    + callbackMetadata?: **Map<string, CallbackMetadata<any>[]>**
+}
+
+ComponentData *-- ComponentMetadata
+ComponentData *-- CallbackMetadata
+
+interface ComponentInstance<T extends any> {
+    + element: **HTMLElement**
+    + instance: **T**
+    + subscriptions: **Subscription[]**
+}
+
+interface CallbackSetupFunction<T> {
+    (metadata: **CallbackMetadata<T>**, instance: **ComponentInstance<T>**, iocContainer: **IocContainerInterface**) => **Subscription**
+}
+
+CallbackSetupFunction *-- CallbackMetadata
+CallbackSetupFunction *-- ComponentInstance
+CallbackSetupFunction *-- IocContainerInterface
+
+enum MutationType {
+    **Added**
+    **Removed**
+    **Updated**
+}
+
+interface Mutation {
+    + type: **MutationType**
+    + element: **Node**
+    + target: **Node**
+}
+
+Mutation *-- MutationType
+
+class ComponentContainer {
+    + **static readonly COMPONENT_CONTAINER_KEY** = 'componentContainer'
+    - $stateObserver: **Subscription**
+    - components: **Map<string, ComponentData>**
+    - instances: **Map<string, Map<string, ComponentInstance<any>>>**
+    - callbackSetupFunctions: **Map<string, CallbackSetupFunction<any>>**
+    - root: **HTMLElement**
+    - iocContainer: **IocContainerInterface**
+
+    + **constructor**(root: **HTMLElement**, iocContainer: **IocContainerInterface**)
+    + **registerComponent**(constructor: **Function**): **void**
+    + **registerCallbackSetupFunction<T>**(key: **string**, callbackSetupFunction: **CallbackSetupFunction<T>**): **void**
+    + **getComponentInstancesBySelector**(selector: **string**): **Map<string, ComponentInstance<any>>**
+    - **setupObserver**(): **Observable<Mutation>**
+    - **initComponents**(): **void**
+    - **initComponent**(componentData: **ComponentData**): **void**
+    - **constructArgs**(element: **HTMLElement**): **Map<string, any>**
+    - **onMutation**(mutation: **Mutation**): **void**
+    - **onDestroy**(): **void**
+    - **destoryInstance**(instance: **ComponentInstance<any>**, componentMetadata: **ComponentMetadata**): **void**
+    - **onError**(error: **Error**): **void**
+}
+
+IocContainer *-- FactoryFunction
+IocContainer *-- ModifierFunction
+IocContainer *-- InjectableMetadata
+
+ComponentContainer *-- IocContainerInterface
+ComponentContainer *-- ComponentData
+ComponentContainer *-- ComponentInstance
+ComponentContainer *-- CallbackSetupFunction
+ComponentContainer *-- Mutation
+
+interface ComponentMetadataInput {
+    + selector: **string**
+}
+
+annotation Component {
+    (args: **ComponentMetadataInput**) => **ClassDecorator**
+}
+
+interface EventOptions {
+    + debounce?: **number**
+}
+
+interface EventMetadata {
+    + type: **DomEvent**
+    + selector: **string**
+    + options?: **EventOptions**
+}
+
+EventMetadata *-- EventOptions
+
+annotation Event {
+    (args: **EventMetadata**) => **MethodDecorator**
+}
+
+
+annotation ComponentEvent {
+    (args: **ComponentEventMetadata**) => **MethodDecorator**
+}
+
+ComponentEvent *-- ComponentEventMetadata
+
+annotation Injectable {
+    (args?: **InjectableMetadata**) => **ClassDecorator**
+}
+
+interface QueryInputMetadata {
+    + selector?: **string**
+    + multiple?: **boolean**
+}
+
+annotation Query {
+    (args?: **QueryInputMetadata**) => **ParameterDecorator**
+}
+
+interface ChildComponentMetadataInput {
+    + selector: **string**
+    + componentSelector?: **string**
+}
+
+annotation ChildComponent {
+    (args: **ChildComponentMetadataInput**) => **ParameterDecorator**
+}
+
+ChildComponent *-- ChildComponentMetadataInput
+
+interface ComponentEventOptions {
+    + debounce?: **number**
+}
+
+interface ComponentEventMetadata {
+    + type: **string**
+    + options?: **ComponentEventOptions**
+}
+
+ComponentEventMetadata *-- ComponentEventOptions
+
+Component *-- ComponentMetadataInput
+Event *-- EventMetadata
+Injectable *-- InjectableMetadata
+Query *-- QueryInputMetadata
+
+interface ComponentEventPayload<S, D> {
+    + source: **S**
+    + data: **D**
+}
+
+interface ComponentEventData<S, D> {
+    + type: **string**
+    + data: **ComponentEventPayload<S, D>**
+}
+
+class ComponentEventEmitter {
+    - subject: **Subject<ComponentEventData<any, any>>**
+    + emit<S, D>(type: **string**, data: **ComponentEventPayload<S, D>**): **void**
+    + on<S, D>(type: **string**): **Observable<ComponentEventPayload<S, D>>**
+}
+
+ComponentEventEmitter *-- ComponentEventData
+ComponentEventEmitter *-- ComponentEventPayload
+ComponentEventEmitter --* IocContainer
+
+@enduml

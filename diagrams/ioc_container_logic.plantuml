@@ -1,0 +1,50 @@
+@startuml
+title __Ioc Container Resolve Logic__
+start
+:**IocContainer::resolve** gets called;
+switch (target type)
+case ()
+    :**Class**;
+    :**retrieves the metadata**;
+    if (there is metadata and no factory or shared instance) then(yes)
+        :Throw **No shared instance found**;
+        end
+    endif
+
+    if (has a shared instance) then(yes)
+        :**return shared instance**;
+        end
+    endif
+
+    if (constructor has params) then(yes)
+        :Prepare arguments by running the registered modifier functions;
+    endif
+
+    if (has a factory) then(yes)
+        :**run the factory**;
+
+        if (should be a shared instance) then(yes)
+            :**store the shared instance**;
+        endif
+
+        :**return the instance**;
+
+        end
+    else(no)
+        :**run the default factory**;
+        :**return the instance**;
+        end
+    endif
+
+case ()
+    :**String**;
+    if (has a shared value) then(yes)
+        :**return shared value**;
+        end
+    else (no)
+        :Throw **No shared value found**;
+        end
+    endif
+endswitch
+
+@enduml
