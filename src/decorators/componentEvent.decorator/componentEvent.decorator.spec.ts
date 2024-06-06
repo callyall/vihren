@@ -25,7 +25,7 @@ describe('Component Event Decorator', () => {
         const metadata = Reflect.getMetadata(CALLBACK_METADATA_KEY, TestClass) as Map<string, CallbackMetadata<ComponentEventMetadata>[]>;
 
         expect(metadata).toBeDefined();
-        expect(metadata.size).toBe(4);
+        expect(metadata.size).toEqual(4);
 
         [
             {
@@ -53,7 +53,7 @@ describe('Component Event Decorator', () => {
                 const storedArray = metadata.get(metadataEntry.callback) as CallbackMetadata<ComponentEventMetadata>[];
 
                 expect(storedArray).toBeInstanceOf(Array);
-                expect(storedArray.length).toBe(1);
+                expect(storedArray.length).toEqual(1);
                 expect(storedArray[0]).toEqual(metadataEntry);
             });
     });

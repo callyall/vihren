@@ -6,8 +6,8 @@ describe('ComponentEventEmitter', () => {
 
        const subscription = eventEmitter.on('test').subscribe((data) => {
 
-           expect(data.source).toBe('testSource');
-           expect(data.data).toBe('test');
+           expect(data.source).toEqual('testSource');
+           expect(data.data).toEqual('test');
 
            subscription.unsubscribe();
            done();

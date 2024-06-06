@@ -14,7 +14,7 @@ describe('Injectable Decorator', () => {
         const metadata = Reflect.getMetadata(INJECTABLE_METADATA_KEY, target) as InjectableMetadata;
 
         expect(metadata).toBeDefined();
-        expect(metadata.shared).toBe(shared);
+        expect(metadata.shared).toEqual(shared);
         expect(metadata.params).toBeUndefined();
     });
 
@@ -30,7 +30,7 @@ describe('Injectable Decorator', () => {
         const metadata = Reflect.getMetadata(INJECTABLE_METADATA_KEY, target) as InjectableMetadata;
 
         expect(metadata).toBeDefined();
-        expect(metadata.shared).toBe(shared);
+        expect(metadata.shared).toEqual(shared);
         expect(metadata.params).toBeUndefined();
     });
 
@@ -53,7 +53,7 @@ describe('Injectable Decorator', () => {
         const metadata = Reflect.getMetadata(INJECTABLE_METADATA_KEY, target) as InjectableMetadata;
 
         expect(metadata).toBeDefined();
-        expect(metadata.shared).toBe(shared);
+        expect(metadata.shared).toEqual(shared);
         expect(metadata.params).toBeDefined();
         expect(metadata.params?.sort()).toEqual(params.sort());
     });
@@ -77,7 +77,7 @@ describe('Injectable Decorator', () => {
         const metadata = Reflect.getMetadata(INJECTABLE_METADATA_KEY, target) as InjectableMetadata;
 
         expect(metadata).toBeDefined();
-        expect(metadata.shared).toBe(shared);
+        expect(metadata.shared).toEqual(shared);
         expect(metadata.params).toBeDefined();
         expect(metadata.params?.sort()).toEqual(params.sort());
     });

@@ -82,7 +82,7 @@ export class ComponentContainer {
                         }
                     }
 
-                    if (mutation.addedNodes) {
+                    if (mutation.addedNodes.length > 0) {
                         try {
                             this.initComponents();
                         } catch (error) {

@@ -48,7 +48,7 @@ describe('Component Decorator', () => {
                 const metadata = Reflect.getMetadata(COMPONENT_METADATA_KEY, target) as ComponentMetadata;
         
                 expect(metadata).toBeDefined();
-                expect(metadata.selector).toBe(selector);
+                expect(metadata.selector).toEqual(selector);
                 expect(metadata.lifecycleHooks).toBeDefined();
                 expect(metadata.lifecycleHooks.sort()).toEqual(lifecycleHooks.sort());
                 expect(metadata.shared).toEqual(false);

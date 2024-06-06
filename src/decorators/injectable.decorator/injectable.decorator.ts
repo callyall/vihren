@@ -21,6 +21,7 @@ export const getInjectableMetadata = (target: Function, args?: InjectableMetadat
         .replace(')', '')
         .replace(/\s+/, '')
         .split(',')
+        .filter((param) => param.trim() !== '')
         .map((param, i) => ({
             name: param.trim().split(' ')[0],
             type: paramTypes[i]
