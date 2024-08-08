@@ -25,6 +25,8 @@ import {
     queryModifierFunction,
 } from "../src";
 
+// YOLO
+
 @Component({ selector: '.input-component' })
 class InputComponent {
     public constructor(
