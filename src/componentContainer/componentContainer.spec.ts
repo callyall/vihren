@@ -46,8 +46,7 @@ describe('ComponentContainer', () => {
 
         document.getElementById('parent')?.appendChild(document.createElement('div'));
 
-        expect(() => container.registerComponent(class {
-        })).toThrow('Component metadata not found');
+        expect(() => container.registerComponent(class {})).toThrow('Component metadata not found!!!');
         document.getElementById('app')?.remove();
     });
 
