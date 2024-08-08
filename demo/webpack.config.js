@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
     mode: 'development',
-    entry: './src/main.ts',
+    entry: './demo/main.ts',
     devtool: 'source-map',
     module: {
         rules: [{
@@ -16,6 +16,6 @@ module.exports = {
     },
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'public'),
     },
 };

@@ -1,14 +1,15 @@
 {
-    "name": "ioc",
+    "name": "components",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
-        "debug": "tsc && node bin/main.js",
-        "test": "npx jest --coverage --color"
+        "test": "npx jest --coverage --color",
+        "demo": "npx webpack --config ./demo/webpack.config.js && http-server ./demo/public"
     },
-    "author": "",
-    "license": "ISC",
+    "author": "Nikolay Brankov(Callyall)",
+    "license": "MIT",
     "dependencies": {
         "reflect-metadata": "^0.2.2",
         "rxjs": "^7.8.1"

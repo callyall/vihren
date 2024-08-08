@@ -1,15 +1,29 @@
-import { Component } from "./decorators/component.decorator/component.decorator";
-import { OnDestroy } from "./interfaces/onDestroy.interface";
-import { OnInit } from "./interfaces/onInit.interface";
-import { ComponentContainer } from "./componentContainer/componentContainer";
-import { Query, QUERY_METADATA_KEY, queryModifierFunction } from "./decorators/query.decorator/query.decorator";
-import { Observable, Subscription, interval, map } from "rxjs";
-import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "./decorators/event.decorator/event.decorator";
-import { IocContainer } from "./iocContainer/IocContainer";
-import { CHILD_COMPONENT_METADATA_KEY, ChildComponent, ChildComponentCollection, childComponentModifierFunction, ChildComponentReference } from "./decorators/childComponent.decorator/childComponent.decorator";
-import { Injectable } from "./decorators/injectable.decorator/injectable.decorator";
-import { COMPONENT_EVENT_METADATA_KEY, ComponentEvent, componentEventCallbackSetupFunction } from "./decorators/componentEvent.decorator/componentEvent.decorator";
-import { ComponentEventEmitter, ComponentEventPayload } from "./services/eventEmitter/componentEventEmitter";
+import {interval, map, Observable, Subscription} from "rxjs";
+import {
+    EVENT_METADATA_KEY,
+    CHILD_COMPONENT_METADATA_KEY,
+    COMPONENT_EVENT_METADATA_KEY,
+    QUERY_METADATA_KEY,
+    ChangeDetector,
+    ChildComponentCollection,
+    ComponentContainer,
+    ComponentEventEmitter,
+    ComponentEventPayload,
+    ComponentInstance,
+    IocContainer,
+    OnDestroy,
+    OnInit,
+    ChildComponent,
+    childComponentModifierFunction,
+    Component,
+    ComponentEvent,
+    componentEventCallbackSetupFunction,
+    Event,
+    eventCallbackSetupFunction,
+    Injectable,
+    Query,
+    queryModifierFunction,
+} from "../src";
 
 @Component({ selector: '.input-component' })
 class InputComponent {
@@ -20,6 +34,10 @@ class InputComponent {
 
     @Event({ type: 'keyup', selector: 'input', options: { debounce: 100 } })
     public keyup(): void {
+        if (this.input.readOnly) {
+            return;
+        }
+
         const isValid = this.isValid();
 
         this.eventEmitter.emit<string, boolean>('inputValidation', { source: this.input.type, data: isValid });
@@ -44,6 +62,12 @@ class InputComponent {
 
     public getValue(): string {
         return this.input.value;
+    }
+
+    public toggle(): boolean {
+        this.input.readOnly = !this.input.readOnly;
+
+        return this.input.readOnly;
     }
 }
 
@@ -73,6 +97,7 @@ class FormComponent implements OnDestroy {
         }
 
         this.submitButton.disabled = true;
+        this.inputs.get().forEach((input: ComponentInstance<InputComponent>) => input.instance.toggle());
         const div = document.createElement('div');
         div.innerHTML = '<h1></h1>'
 
@@ -155,13 +180,20 @@ class CounterComponent implements OnInit, OnDestroy {
 }
 
 window.onload = function () {
+    const rootElement = document.getElementById('app') as HTMLElement;
+
     const iocContainer = new IocContainer();
     iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifierFunction);
     iocContainer.registerArgumentModifier(CHILD_COMPONENT_METADATA_KEY, childComponentModifierFunction);
     iocContainer.registerValue(ComponentEventEmitter.name, new ComponentEventEmitter());
     iocContainer.registerValue(CounterService.name, new CounterService());
 
-    const componentContainer = new ComponentContainer(document.getElementById('app') as HTMLElement, iocContainer);
+
+    const componentContainer = new ComponentContainer(
+        rootElement,
+        iocContainer,
+        new ChangeDetector(rootElement)
+    );
     componentContainer.registerCallbackSetupFunction(EVENT_METADATA_KEY, eventCallbackSetupFunction);
     componentContainer.registerCallbackSetupFunction(COMPONENT_EVENT_METADATA_KEY, componentEventCallbackSetupFunction);
     componentContainer.registerComponent(InputComponent);
