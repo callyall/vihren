@@ -1,11 +1,10 @@
 import { callback, CallbackMetadata, CallbackSetupFunction } from "../callback.decorator/callback.decorator";
-import { IocContainerInterface } from "../../interfaces/IocContainer.interface";
 import { debounce, filter, fromEvent, interval, Subscription } from "rxjs";
 import { ComponentInstance } from "../../interfaces/componentInstance.interface";
 
 export const EVENT_METADATA_KEY = 'method:event';
 
-export const Event = (args: EventMetadata) => (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+export const Event = (args: EventMetadata) => (target: Object, propertyKey: string | symbol): void => {
     callback<EventMetadata>(
         {
             callback: propertyKey as string,
@@ -17,7 +16,7 @@ export const Event = (args: EventMetadata) => (target: Object, propertyKey: stri
     );
 };
 
-export const eventCallbackSetupFunction: CallbackSetupFunction<EventMetadata> = (metadata: CallbackMetadata<EventMetadata>, instance: ComponentInstance<any>, iocContainer: IocContainerInterface): Subscription => {
+export const eventCallbackSetupFunction: CallbackSetupFunction<EventMetadata> = (metadata: CallbackMetadata<EventMetadata>, instance: ComponentInstance<any>): Subscription => {
     let observable = fromEvent(instance.element, metadata.data.type)
         .pipe(filter((event: Event) => (event.target as HTMLElement).matches(metadata.data.selector)));
 

@@ -170,7 +170,7 @@ describe('IocContainer', () => {
 
         const data = 'testMessage';
 
-        argumentModifier({ key: 'test', data }, Test, 0);
+        argumentModifier({ key: 'test', data }, Test as Function, 0);
 
         const container = new IocContainer();
 
@@ -185,7 +185,7 @@ describe('IocContainer', () => {
 
         const data = 'testMessage';
 
-        argumentModifier({ key: 'test', data }, Test, 1);
+        argumentModifier({ key: 'test', data }, Test as Function, 1);
 
         const container = new IocContainer();
         container.registerArgumentModifier('test',(argumentMetadata: ArgumentMetadata<string>, paramMetadata: ParamMetadata, args: Map<string, any>): Map<string, any> => {

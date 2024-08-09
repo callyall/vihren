@@ -10,16 +10,16 @@ describe('Component Event Decorator', () => {
     it('Should define metadata for a component event dataset', () => {
         class TestClass {
             @ComponentEvent({ type: 'click' })
-            public onClick() { }
+            public onClick(): void { }
 
             @ComponentEvent({ type: 'click', options: { debounce: 100 } })
-            public onSecondClick() { }
+            public onSecondClick(): void { }
 
             @ComponentEvent({ type: 'keyup' })
-            public onKeyUp() { }
+            public onKeyUp(): void { }
 
             @ComponentEvent({ type: 'change' })
-            public onChange() { }
+            public onChange(): void { }
         }
 
         const metadata = Reflect.getMetadata(CALLBACK_METADATA_KEY, TestClass) as Map<string, CallbackMetadata<ComponentEventMetadata>[]>;
@@ -69,7 +69,7 @@ describe('Component Event Decorator', () => {
         const instance: ComponentInstance<any> = {
             element: document.getElementById('component') as HTMLElement,
             instance: {
-                onClick: jest.fn((data) => {
+                onClick: jest.fn((data): void => {
                     expect(data).toEqual({ source: null, data: null });
                     done();
                 })

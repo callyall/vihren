@@ -3,7 +3,7 @@ import { OnChange } from "../../interfaces/onChange.interface";
 import { OnDestroy } from "../../interfaces/onDestroy.interface";
 import { OnInit } from "../../interfaces/onInit.interface";
 
-describe('Component Decorator', () => {
+describe('Component Decorator', (): void => {
     [
         {
             target: class { },
@@ -12,37 +12,37 @@ describe('Component Decorator', () => {
         },
         {
             target: class implements OnInit {
-                onInit() { }
+                onInit(): void { }
             },
             selector: '.example-component-1',
             lifecycleHooks: [LifecycleHook.OnInit],
         },
         {
             target: class implements OnChange {
-                onChange() { }
+                onChange(): void { }
             },
             selector: '.example-component-2',
             lifecycleHooks: [LifecycleHook.OnChange],
         },
         {
             target: class implements OnDestroy {
-                onDestroy() { }
+                onDestroy(): void { }
             },
             selector: '.example-component-3',
             lifecycleHooks: [LifecycleHook.OnDestroy],
         },
         {
             target: class implements OnInit, OnChange, OnDestroy {
-                onInit() { }
-                onChange() { }
-                onDestroy() { }
+                onInit(): void { }
+                onChange(): void { }
+                onDestroy(): void { }
             },
             selector: '.example-component-4',
             lifecycleHooks: [LifecycleHook.OnInit, LifecycleHook.OnChange, LifecycleHook.OnDestroy],
         }
     ]
-        .forEach(({ target, selector, lifecycleHooks }, i) => {
-            it(`Should define metadata for a component dataset ${i}`, () => {
+        .forEach(({ target, selector, lifecycleHooks }, i): void => {
+            it(`Should define metadata for a component dataset ${i}`, (): void => {
                 Component({ selector })(target);
         
                 const metadata = Reflect.getMetadata(COMPONENT_METADATA_KEY, target) as ComponentMetadata;

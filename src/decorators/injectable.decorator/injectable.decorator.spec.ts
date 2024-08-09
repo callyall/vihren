@@ -36,7 +36,7 @@ describe('Injectable Decorator', () => {
 
     it('Should define shared with constructor parameters', () => {
         const target = class {
-            constructor(name: string, age: number) { }
+            constructor(name: string, age: number) { console.log(name, age); }
         }
 
         const params = [
@@ -60,7 +60,7 @@ describe('Injectable Decorator', () => {
 
     it('Should define not shared with constructor parameters', () => {
         const target = class {
-            constructor(name: string, age: number) { }
+            constructor(name: string, age: number) { console.log(name, age); }
         }
 
         const params = [

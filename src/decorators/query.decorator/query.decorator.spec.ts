@@ -5,7 +5,7 @@ import { ARGUMENT_MODIFIER_METADATA_KEY, ArgumentMetadata } from "../argumentMod
 describe('QueryDecorator', () => {
     it('Should define QueryMetadata without selector and multiple = false ', () => {
         class TestComponent { 
-            constructor(@Query() query: string) {}
+            constructor(@Query() query: string) { console.log(query); }
         }
 
         const metadata = Reflect.getMetadata(ARGUMENT_MODIFIER_METADATA_KEY, TestComponent) as Map<number, ArgumentMetadata<QueryMetadata>>;
@@ -25,7 +25,7 @@ describe('QueryDecorator', () => {
     it('Should throw an error', () => {
         expect(() => {
             const target = class { 
-                constructor(query: string) {}
+                constructor(query: string) { console.log(query); }
             };
 
             Query({ multiple: true })(target, undefined, 0);
@@ -38,7 +38,7 @@ describe('QueryDecorator', () => {
         const index = 1;
 
         class TestComponent { 
-            constructor(someParam: string, @Query({ selector, multiple }) query: string) {}
+            constructor(someParam: string, @Query({ selector, multiple }) query: string) { console.log(someParam, query); }
         }
 
         const metadata = Reflect.getMetadata(ARGUMENT_MODIFIER_METADATA_KEY, TestComponent) as Map<number, ArgumentMetadata<QueryMetadata>>;
@@ -60,7 +60,7 @@ describe('QueryDecorator', () => {
         const index = 1;
 
         class TestComponent { 
-            constructor(someParam: string, @Query({ selector, multiple }) query: string) {}
+            constructor(someParam: string, @Query({ selector, multiple }) query: string) { console.log(someParam, query); }
         }
 
         const metadata = Reflect.getMetadata(ARGUMENT_MODIFIER_METADATA_KEY, TestComponent) as Map<number, ArgumentMetadata<QueryMetadata>>;
@@ -131,7 +131,7 @@ describe('QueryDecorator', () => {
 
         result = queryModifierFunction(
             { key: QUERY_METADATA_KEY, data: { selector: 'div', multiple: false, parameterIndex: 0 }},
-            { name, type: ActiveElementReference },
+            { name, type: ActiveElementReference as Function },
             args
         );
 
@@ -141,7 +141,7 @@ describe('QueryDecorator', () => {
 
         result = queryModifierFunction(
             { key: QUERY_METADATA_KEY, data: { selector: 'div', multiple: true, parameterIndex: 0 }},
-            { name, type: ActiveElementCollection },
+            { name, type: ActiveElementCollection as Function },
             args
         );
 
@@ -152,7 +152,7 @@ describe('QueryDecorator', () => {
         expect(() => {
             queryModifierFunction(
                 { key: QUERY_METADATA_KEY, data: { multiple: false, parameterIndex: 0 }},
-                { name, type: ActiveElementReference },
+                { name, type: ActiveElementReference as Function },
                 args
             );
         }).toThrow('ActiveElementReference cannot be used without a selector');
@@ -160,7 +160,7 @@ describe('QueryDecorator', () => {
         expect(() => {
             queryModifierFunction(
                 { key: QUERY_METADATA_KEY, data: { selector: 'div', multiple: true, parameterIndex: 0 }},
-                { name, type: ActiveElementReference },
+                { name, type: ActiveElementReference as Function },
                 args
             );
         }).toThrow('ActiveElementReference cannot be used with multiple results');
@@ -168,7 +168,7 @@ describe('QueryDecorator', () => {
         expect(() => {
             queryModifierFunction(
                 { key: QUERY_METADATA_KEY, data: { multiple: true, parameterIndex: 0 }},
-                { name, type: ActiveElementCollection },
+                { name, type: ActiveElementCollection as Function },
                 args
             );
         }).toThrow('ActiveElementCollection cannot be used without a selector');
@@ -176,7 +176,7 @@ describe('QueryDecorator', () => {
         expect(() => {
             queryModifierFunction(
                 { key: QUERY_METADATA_KEY, data: { selector: 'div', multiple: false, parameterIndex: 0 }},
-                { name, type: ActiveElementCollection },
+                { name, type: ActiveElementCollection as Function },
                 args
             );
         }).toThrow('ActiveElementCollection cannot be used with a single result');

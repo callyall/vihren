@@ -9,16 +9,16 @@ describe('Event Decorator', () => {
     it('Should define metadata for an event dataset', () => {
         class TestClass {
             @Event({ type: 'click', selector: 'button' })
-            public onClick() { }
+            public onClick(): void { }
 
             @Event({ type: 'click', selector: 'a', options: { debounce: 100 } })
-            public onSecondClick() { }
+            public onSecondClick(): void { }
 
             @Event({ type: 'keyup', selector: 'input' })
-            public onKeyUp() { }
+            public onKeyUp(): void { }
 
             @Event({ type: 'change', selector: 'select' })
-            public onChange() { }
+            public onChange(): void { }
         }
 
         const metadata = Reflect.getMetadata(CALLBACK_METADATA_KEY, TestClass) as Map<string, CallbackMetadata<EventMetadata>[]>;

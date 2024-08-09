@@ -7,12 +7,14 @@ import { ComponentInstance } from "../../interfaces/componentInstance.interface"
 describe('ChildComponentDecorator', () => {
     class TestComponent {
         public constructor(public readonly id: number) {
+            console.log(id);
         }
     }
 
     it('Should define ChildComponentMetadata', () => {
         class TestComponent {
             constructor(@ChildComponent({selector: 'test'}) test: string) {
+                console.log(test);
             }
         }
 
