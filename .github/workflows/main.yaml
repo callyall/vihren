@@ -10,6 +10,14 @@ on:
       - synchronize
       - ready_for_review
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm install
+      - name: Lint
+        run: npm run lint
   test:
     runs-on: ubuntu-latest
     steps:

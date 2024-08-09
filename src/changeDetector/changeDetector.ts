@@ -20,9 +20,9 @@ export class ChangeDetector extends Observable<Mutation> implements ChangeDetect
             (mutations: MutationRecord[]) => {
                 let updated: Mutation[] = [];
                 let added: Mutation[] = [];
-                let removed: Mutation[] = [];
+                const removed: Mutation[] = [];
 
-                for (let mutation of mutations) {
+                for (const mutation of mutations) {
                     if (Array.from(mutation.removedNodes ?? []).find((node) => node === this.root)) {
                         subscriber.complete();
                         return;
@@ -37,7 +37,7 @@ export class ChangeDetector extends Observable<Mutation> implements ChangeDetect
                     }
 
                     if (mutation.removedNodes) {
-                        for (let node of mutation.removedNodes) {
+                        for (const node of mutation.removedNodes) {
                             if (!removed.find((m) => m.element === node)) {
                                 removed.push({ element: node, type: MutationType.Removed, target: mutation.target });
                             }
@@ -45,7 +45,7 @@ export class ChangeDetector extends Observable<Mutation> implements ChangeDetect
                     }
 
                     if (mutation.addedNodes.length > 0) {
-                        for (let node of mutation.addedNodes) {
+                        for (const node of mutation.addedNodes) {
                             if (!added.find((m) => m.element === node)) {
                                 added.push({ element: node, type: MutationType.Added, target: mutation.target });
                             }

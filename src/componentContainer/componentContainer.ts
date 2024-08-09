@@ -34,7 +34,7 @@ export class ComponentContainer {
                 next: (mutation: Mutation) => {
                     const affectedComponents = this.getAffectedComponentData(mutation);
 
-                    for (let { selector, components, metadata } of affectedComponents) {
+                    for (const { selector, components, metadata } of affectedComponents) {
                         this.onRemoved(mutation, selector, components, metadata);
                     }
                 },
@@ -47,7 +47,7 @@ export class ComponentContainer {
                 next: (mutation: Mutation) => {
                     const affectedComponents = this.getAffectedComponentData(mutation);
 
-                    for (let { selector, components, metadata } of affectedComponents) {
+                    for (const { selector, components, metadata } of affectedComponents) {
                         this.onAdded(mutation, selector, components, metadata);
                     }
                 },
@@ -59,7 +59,7 @@ export class ComponentContainer {
                 next: (mutation: Mutation) => {
                     const affectedComponents = this.getAffectedComponentData(mutation);
 
-                    for (let { selector, components, metadata } of affectedComponents) {
+                    for (const { selector, components, metadata } of affectedComponents) {
                         this.onUpdated(mutation, selector, components, metadata);
                     }
                 },
@@ -91,14 +91,14 @@ export class ComponentContainer {
     }
 
     private initComponents(): void {
-        for (let componentData of this.components.values()) {
+        for (const componentData of this.components.values()) {
             this.initComponent(componentData);
         }
     }
 
     private initComponent(componentData: ComponentData): void {
         let i = 0;
-        for (let element of this.root.querySelectorAll(componentData.metadata.selector)) {
+        for (const element of this.root.querySelectorAll(componentData.metadata.selector)) {
             let instances = this.instances.get(componentData.metadata.selector);
 
             if (!instances) {
@@ -129,7 +129,7 @@ export class ComponentContainer {
             const subscriptions: Subscription[] = [];
             const instanceObject = { instance, element: element as HTMLElement, subscriptions };
 
-            for (let [_, metadataArr] of componentData.callbackMetadata ?? []) {
+            for (const [_, metadataArr] of componentData.callbackMetadata ?? []) {
                 metadataArr.forEach((metadata) => {
                     const callbackSetupFunction = this.callbackSetupFunctions.get(metadata.key);
 
@@ -151,7 +151,7 @@ export class ComponentContainer {
         const args = element.dataset;
         const result = new Map<string, any>();
 
-        for (let [key, value] of Object.entries(args)) {
+        for (const [key, value] of Object.entries(args)) {
             result.set(key, value);
         }
 
@@ -204,7 +204,7 @@ export class ComponentContainer {
     private getAffectedComponentData(mutation: Mutation): Array<{ selector: string, components: ComponentInstance<any>[], metadata: ComponentMetadata }> {
         const found: Array<{ selector: string, components: ComponentInstance<any>[], metadata: ComponentMetadata }> = [];
 
-        for (let [selector, { metadata }] of this.components) {
+        for (const [selector, { metadata }] of this.components) {
             const instances = Array.from(this.instances.get(selector)?.values() ?? []);
 
             found.push({
@@ -229,7 +229,7 @@ export class ComponentContainer {
     }
 
     private onDestroy(): void {
-        for (let [selector, componentData] of this.components) {
+        for (const [selector, componentData] of this.components) {
             const instances = this.instances.get(selector);
 
             instances?.forEach((instance) => this.destroyInstance(instance, componentData.metadata));

@@ -11,9 +11,8 @@ describe('CallbackDecorator', () => {
 
        expect(metadata).toBeUndefined();
 
-       const meta = { key: 'test', data: 'test' };
+       const meta = { key: 'test', data: 'test', callback: 'test' };
 
-       // @ts-ignore
        callback(meta, Test, 'callback');
 
        metadata = Reflect.getMetadata(CALLBACK_METADATA_KEY, Test);
@@ -22,7 +21,6 @@ describe('CallbackDecorator', () => {
        expect(metadata.get('callback').length).toEqual(1);
        expect(metadata.get('callback')[0]).toEqual(meta);
 
-       // @ts-ignore
        callback(meta, Test, 'callback');
 
        metadata = Reflect.getMetadata(CALLBACK_METADATA_KEY, Test);
