@@ -12,7 +12,7 @@ import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "../decora
 const iocContainer = new IocContainer();
 iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifierFunction);
 
-const setupDomAndContainer = () => {
+const setupDomAndContainer = (): { rootElement: HTMLElement, container: ComponentContainer } => {
     document.body.innerHTML = `
             <div id="parent">
                 <div id="app">
@@ -42,7 +42,7 @@ describe('ComponentContainer', () => {
     });
 
     it('Should fail to register a component', () => {
-        const {rootElement, container} = setupDomAndContainer();
+        const { container} = setupDomAndContainer();
 
         document.getElementById('parent')?.appendChild(document.createElement('div'));
 
@@ -52,7 +52,7 @@ describe('ComponentContainer', () => {
     });
 
     it('Should initialise a component', done => {
-        const {rootElement, container} = setupDomAndContainer();
+        const { container} = setupDomAndContainer();
 
         @Component({selector: '.test-component'})
         class TestComponent implements OnInit {
@@ -73,7 +73,7 @@ describe('ComponentContainer', () => {
     });
 
     it('Should update a component', done => {
-        const {rootElement, container} = setupDomAndContainer();
+        const { container} = setupDomAndContainer();
 
         let detectChange = true;
 
@@ -108,7 +108,7 @@ describe('ComponentContainer', () => {
     });
 
     it('Should destroy a component', done => {
-        const {rootElement, container} = setupDomAndContainer();
+        const { container} = setupDomAndContainer();
 
         let detectDestruction = true;
 
@@ -144,7 +144,7 @@ describe('ComponentContainer', () => {
             done();
         });
 
-        const {rootElement, container} = setupDomAndContainer();
+        const { container} = setupDomAndContainer();
 
         @Component({selector: '.test-component'})
         class TestComponent {
@@ -161,7 +161,7 @@ describe('ComponentContainer', () => {
     });
 
     it('Should fail to setup a callback function', () => {
-        const {rootElement, container} = setupDomAndContainer();
+        const { container} = setupDomAndContainer();
 
         @Component({selector: '.test-component'})
         class TestComponent {
@@ -178,7 +178,7 @@ describe('ComponentContainer', () => {
     });
 
     it('Should setup a callback function', () => {
-        const {rootElement, container} = setupDomAndContainer();
+        const { container} = setupDomAndContainer();
 
         @Component({selector: '.test-component'})
         class TestComponent {
@@ -198,7 +198,7 @@ describe('ComponentContainer', () => {
     });
 
     it('Should retrieve component instances by selector', () => {
-        const {rootElement, container} = setupDomAndContainer();
+        const { container} = setupDomAndContainer();
 
         @Component({selector: '.test-component'})
         class TestComponent {

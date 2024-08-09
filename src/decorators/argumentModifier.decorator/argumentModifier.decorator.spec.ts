@@ -8,7 +8,7 @@ describe('ArgumentModifierDecorator', () => {
 
         const firstMeta = { key: 'test', data: 'test' };
 
-        argumentModifier(firstMeta, Test, 0);
+        argumentModifier(firstMeta, Test as Function, 0);
 
         let metadata = Reflect.getMetadata('argument:modifier', Test) as Map<number, any>;
 
@@ -19,7 +19,7 @@ describe('ArgumentModifierDecorator', () => {
 
         const secondMeta = { key: 'test2', data: 'test2' };
 
-        argumentModifier(secondMeta, Test, 1);
+        argumentModifier(secondMeta, Test as Function, 1);
 
         metadata = Reflect.getMetadata('argument:modifier', Test) as Map<number, any>;
 

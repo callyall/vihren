@@ -8,7 +8,11 @@ import { OnChange } from "../interfaces/onChange.interface";
 import { ComponentInstance } from "../interfaces/componentInstance.interface";
 import { ROOT_ELEMENT_KEY } from "../decorators/query.decorator/query.decorator";
 import { IocContainerInterface } from "../interfaces/IocContainer.interface";
-import { CALLBACK_METADATA_KEY, CallbackSetupFunction } from "../decorators/callback.decorator/callback.decorator";
+import {
+    CALLBACK_METADATA_KEY,
+    CallbackMetadata,
+    CallbackSetupFunction
+} from "../decorators/callback.decorator/callback.decorator";
 import { ChangeDetectorInterface } from "../interfaces/changeDetector.interface";
 
 export class ComponentContainer {
@@ -47,8 +51,8 @@ export class ComponentContainer {
                 next: (mutation: Mutation) => {
                     const affectedComponents = this.getAffectedComponentData(mutation);
 
-                    for (const { selector, components, metadata } of affectedComponents) {
-                        this.onAdded(mutation, selector, components, metadata);
+                    for (const { components, metadata } of affectedComponents) {
+                        this.onAdded(mutation, components, metadata);
                     }
                 },
             });
@@ -59,23 +63,23 @@ export class ComponentContainer {
                 next: (mutation: Mutation) => {
                     const affectedComponents = this.getAffectedComponentData(mutation);
 
-                    for (const { selector, components, metadata } of affectedComponents) {
-                        this.onUpdated(mutation, selector, components, metadata);
+                    for (const { components, metadata } of affectedComponents) {
+                        this.onUpdated(mutation, components, metadata);
                     }
                 },
             });
 
     }
 
-    public registerComponent(constructor: Function): void {
-        const metadata = Reflect.getMetadata(COMPONENT_METADATA_KEY, constructor);
-        const callbackMetadata = Reflect.getMetadata(CALLBACK_METADATA_KEY, constructor);
+    public registerComponent(constructor: unknown): void {
+        const metadata = Reflect.getMetadata(COMPONENT_METADATA_KEY, constructor as Function);
+        const callbackMetadata = Reflect.getMetadata(CALLBACK_METADATA_KEY, constructor as Function);
 
         if (!metadata) {
             throw new Error('Component metadata not found');
         }
 
-        const componentData = { constructor, metadata, callbackMetadata };
+        const componentData = { constructor: (constructor as Function), metadata, callbackMetadata };
 
         this.components.set(metadata.selector, componentData);
 
@@ -129,7 +133,9 @@ export class ComponentContainer {
             const subscriptions: Subscription[] = [];
             const instanceObject = { instance, element: element as HTMLElement, subscriptions };
 
-            for (const [_, metadataArr] of componentData.callbackMetadata ?? []) {
+            for (const keyValue of componentData.callbackMetadata ?? []) {
+                const metadataArr = keyValue[1] as CallbackMetadata<any>[];
+
                 metadataArr.forEach((metadata) => {
                     const callbackSetupFunction = this.callbackSetupFunctions.get(metadata.key);
 
@@ -179,7 +185,7 @@ export class ComponentContainer {
         }
     }
 
-    private onAdded(mutation: Mutation, selector: string, components: ComponentInstance<any>[], metadata: ComponentMetadata): void {
+    private onAdded(mutation: Mutation, components: ComponentInstance<any>[], metadata: ComponentMetadata): void {
         for (let i = 0; i < components.length; i++) {
             const instance = components[i];
 
@@ -191,7 +197,7 @@ export class ComponentContainer {
         this.initComponents();
     }
 
-    private onUpdated(mutation: Mutation, selector: string, components: ComponentInstance<any>[], metadata: ComponentMetadata): void {
+    private onUpdated(mutation: Mutation, components: ComponentInstance<any>[], metadata: ComponentMetadata): void {
         for (let i = 0; i < components.length; i++) {
             const instance = components[i];
 

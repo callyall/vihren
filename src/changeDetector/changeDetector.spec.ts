@@ -1,7 +1,7 @@
 import { ChangeDetector } from "./changeDetector";
 import { Mutation, MutationType } from "../interfaces/mutation.interface";
 
-const setupDomainDetector = () => {
+const setupDomainDetector = (): ChangeDetector => {
     document.body.innerHTML = `
             <div id="parent">
                 <div id="app">

@@ -6,7 +6,7 @@ import { ComponentEventEmitter, ComponentEventPayload } from "../../services/eve
 
 export const COMPONENT_EVENT_METADATA_KEY = 'method:componentEvent';
 
-export const ComponentEvent = (args: ComponentEventMetadata) => (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+export const ComponentEvent = (args: ComponentEventMetadata) => (target: Object, propertyKey: string | symbol): void => {
     callback<ComponentEventMetadata>(
         {
             callback: propertyKey as string,
@@ -19,7 +19,7 @@ export const ComponentEvent = (args: ComponentEventMetadata) => (target: Object,
 };
 
 export const componentEventCallbackSetupFunction: CallbackSetupFunction<ComponentEventMetadata> = (metadata: CallbackMetadata<ComponentEventMetadata>, instance: ComponentInstance<any>, iocContainer: IocContainerInterface): Subscription => {
-    const eventEmitter = iocContainer.resolve<ComponentEventEmitter>(ComponentEventEmitter);
+    const eventEmitter = iocContainer.resolve<ComponentEventEmitter>(ComponentEventEmitter as Function);
 
     let observable = eventEmitter.on(metadata.data.type);
 
