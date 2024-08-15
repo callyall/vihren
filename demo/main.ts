@@ -1,4 +1,4 @@
-import {interval, map, Observable, Subscription} from "rxjs";
+import { map, Observable, Subscription, take } from "rxjs";
 import {
     EVENT_METADATA_KEY,
     CHILD_COMPONENT_METADATA_KEY,
@@ -23,13 +23,14 @@ import {
     Injectable,
     Query,
     queryModifierFunction,
+    TimeService
 } from "../src";
 
 @Component({ selector: '.input-component' })
 class InputComponent {
     public constructor(
-        @Query({ selector: 'input', multiple: false }) public input: HTMLInputElement,
-        private eventEmitter: ComponentEventEmitter,
+        @Query({ selector: 'input', multiple: false }) public readonly input: HTMLInputElement,
+        private readonly eventEmitter: ComponentEventEmitter,
     ) {}
 
     @Event({ type: 'keyup', selector: 'input', options: { debounce: 100 } })
@@ -78,8 +79,8 @@ class FormComponent implements OnDestroy {
     public constructor(
         // @ChildComponent({ selector: '#email-component', componentSelector: '.input-component' }) private emailComponent: ChildComponentReference<InputComponent>,
         // @ChildComponent({ selector: '#password-component', componentSelector: '.input-component' }) private passwordComponent: ChildComponentReference<InputComponent>,
-        @ChildComponent({ selector: '.input-component' }) private inputs: ChildComponentCollection<InputComponent>,
-        @Query({ selector: '#submit', multiple: false }) private submitButton: HTMLButtonElement,
+        @ChildComponent({ selector: '.input-component' }) private readonly inputs: ChildComponentCollection<InputComponent>,
+        @Query({ selector: '#submit', multiple: false }) private readonly submitButton: HTMLButtonElement,
     ) {
         this.submitButton.disabled = true;
     }
@@ -134,21 +135,14 @@ class FormComponent implements OnDestroy {
 
 @Injectable({ shared: true })
 class CounterService {
-    private counter: number = 10;
-    private counter$: Observable<number> = interval(1000).pipe(
-        map(() => {
-            this.counter--;
-
-            if (this.counter < 0) {
-                this.counter = 10;
-            }
-
-            return this.counter;
-        })
-    );
+    public constructor(private readonly timeService: TimeService) {}
 
     public getCounter(): Observable<number> {
-        return this.counter$;
+        return this.timeService.interval(1000)
+            .pipe(
+                take(11),
+                map((number) => 10 - number)
+            )
     }
 }
 
@@ -157,20 +151,20 @@ class CounterComponent implements OnInit, OnDestroy {
     private counterSubscription: Subscription | null = null;
 
     public constructor(
-        private counterService: CounterService,
-        @Query() private rootElement: HTMLDivElement,
-        @Query({ selector: 'h1' }) private header: HTMLHeadingElement,
+        @Query() private readonly rootElement: HTMLDivElement,
+        @Query({ selector: 'h1' }) private readonly header: HTMLHeadingElement,
+        private readonly counterService: CounterService,
     ) {
     }
 
     public onInit(): void {
-        this.counterService.getCounter().subscribe((counter: number) => {
-            if (counter === 0) {
-                this.rootElement.remove();
-            }
-
-            this.header.textContent = `Redirecting in ${counter}`;
-        });
+        this
+            .counterService
+            .getCounter()
+            .subscribe({
+                next: (counter: number) => this.header.textContent = `Redirecting in ${counter}`,
+                complete: () => this.rootElement.remove(),
+            });
     }
 
     public onDestroy(): void {
@@ -186,14 +180,13 @@ window.onload = function () {
     iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifierFunction);
     iocContainer.registerArgumentModifier(CHILD_COMPONENT_METADATA_KEY, childComponentModifierFunction);
     iocContainer.registerValue(ComponentEventEmitter.name, new ComponentEventEmitter());
-    iocContainer.registerValue(CounterService.name, new CounterService());
+    iocContainer.registerValue(TimeService.name, new TimeService());
+    iocContainer.registerFactory<CounterService>(CounterService.name, () => new CounterService(iocContainer.resolve(TimeService.name)));
 
+    const changeDetector = new ChangeDetector(rootElement);
 
-    const componentContainer = new ComponentContainer(
-        rootElement,
-        iocContainer,
-        new ChangeDetector(rootElement)
-    );
+    const componentContainer = new ComponentContainer(rootElement, iocContainer, changeDetector);
+
     componentContainer.registerCallbackSetupFunction(EVENT_METADATA_KEY, eventCallbackSetupFunction);
     componentContainer.registerCallbackSetupFunction(COMPONENT_EVENT_METADATA_KEY, componentEventCallbackSetupFunction);
     componentContainer.registerComponent(InputComponent);
