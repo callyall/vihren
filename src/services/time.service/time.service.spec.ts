@@ -1,4 +1,4 @@
-import { TimeService } from "./timeService";
+import { TimeService } from "./time.service";
 
 describe('TimeService', () => {
     const period: number = 100;
