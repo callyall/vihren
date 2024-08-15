@@ -6,10 +6,14 @@ import {
     Event,
     OnDestroy,
     Query
-} from "../../src";
-import {InputComponent} from "./input.component";
+} from "../../../src";
+import { InputComponent } from "../input.component/input.component";
+import template from "./form.component.html"
 
-export @Component({ selector: '#form-component' })
+export @Component({ 
+    selector: '#form-component',
+    template
+})
 class FormComponent implements OnDestroy {
     private inputValidity: Map<string, boolean> = new Map<string, boolean>([['email', false], ['password', false]]);
 
@@ -37,9 +41,6 @@ class FormComponent implements OnDestroy {
         this.submitButton.disabled = true;
         this.inputs.get().forEach((input: ComponentInstance<InputComponent>) => input.instance.toggle());
         const div = document.createElement('div');
-        div.innerHTML = '<h1></h1>'
-
-        div.classList.add('row', 'mt-4', 'p-5', 'bg-primary', 'text-white', 'rounded', 'justify-content-center');
         div.id = 'counter-component';
 
         document.getElementById('app')?.prepend(div);
@@ -59,12 +60,8 @@ class FormComponent implements OnDestroy {
 
     public onDestroy(): void {
         const div = document.createElement('div');
-        div.innerHTML = `
-          <h1>You are logged in</h1>
-          <p>${this.inputs.get()[0].instance.getValue()} - ${this.inputs.get()[1].instance.getValue()}</p>
-        `;
-
-        div.classList.add('row', 'mt-4', 'p-5', 'bg-primary', 'text-white', 'rounded', 'justify-content-center');
+        div.id = 'dashboard';
+        div.dataset.name = `${this.inputs.get()[0].instance.getValue()} - ${this.inputs.get()[1].instance.getValue()}`;
 
         document.getElementById('app')?.appendChild(div);
     }

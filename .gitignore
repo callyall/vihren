@@ -1,6 +1,5 @@
-dist/bundle.js
-dist/bundle.js.LICENSE.txt
-dist/bundle.js.map
+**/bundle.js
+**/bundle.js.map
 node_modules
 package-lock.json
 coverage

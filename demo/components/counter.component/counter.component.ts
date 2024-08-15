@@ -1,8 +1,12 @@
-import { Component, OnDestroy, OnInit, Query } from "../../src";
+import { Component, OnDestroy, OnInit, Query } from "../../../src";
 import { Subscription } from "rxjs";
-import { CounterService } from "../services/counter.service";
+import { CounterService } from "../../services/counter.service";
+import template from './counter.component.html';
 
-@Component({ selector: '#counter-component' })
+@Component({
+    selector: '#counter-component',
+    template,
+})
 export class CounterComponent implements OnInit, OnDestroy {
     private counterSubscription: Subscription | null = null;
 

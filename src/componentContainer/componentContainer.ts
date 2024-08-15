@@ -83,7 +83,7 @@ export class ComponentContainer {
 
         this.components.set(metadata.selector, componentData);
 
-        this.initComponent(componentData);
+        this.initComponent(componentData, this.root);
     }
 
     public registerCallbackSetupFunction<T>(key: string, callbackSetupFunction: CallbackSetupFunction<T>): void {
@@ -94,15 +94,15 @@ export class ComponentContainer {
         return this.instances.get(selector) ?? new Map<string, ComponentInstance<any>>();
     }
 
-    private initComponents(): void {
+    private initComponents(target?: HTMLElement): void {
         for (const componentData of this.components.values()) {
-            this.initComponent(componentData);
+            this.initComponent(componentData, target ?? this.root);
         }
     }
 
-    private initComponent(componentData: ComponentData): void {
+    private initComponent(componentData: ComponentData, root: HTMLElement): void {
         let i = 0;
-        for (const element of this.root.querySelectorAll(componentData.metadata.selector)) {
+        for (const element of root.querySelectorAll(componentData.metadata.selector)) {
             let instances = this.instances.get(componentData.metadata.selector);
 
             if (!instances) {
@@ -119,6 +119,10 @@ export class ComponentContainer {
                 }
 
                 continue;
+            }
+
+            if (componentData.metadata.template) {
+                element.innerHTML = componentData.metadata.template;
             }
 
             const instance: any = this.iocContainer.resolve(componentData.constructor, this.constructArgs((element as HTMLElement)));
@@ -194,7 +198,7 @@ export class ComponentContainer {
             }
         }
 
-        this.initComponents();
+        this.initComponents((mutation.target) as HTMLElement);
     }
 
     private onUpdated(mutation: Mutation, components: ComponentInstance<any>[], metadata: ComponentMetadata): void {

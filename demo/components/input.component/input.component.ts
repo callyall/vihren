@@ -1,4 +1,4 @@
-import { Component, ComponentEventEmitter, Event, Query } from "../../src";
+import { Component, ComponentEventEmitter, Event, Query } from "../../../src";
 
 @Component({ selector: '.input-component' })
 export class InputComponent {

@@ -5,11 +5,18 @@ module.exports = {
     entry: './demo/main.ts',
     devtool: 'source-map',
     module: {
-        rules: [{
-            test: /\.tsx?$/,
-            use: 'ts-loader',
-            exclude: /node_modules/,
-        }, ],
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
+                
+            },
+            {
+                test: /\.html$/i,
+                loader: "html-loader",
+            },
+        ],
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],

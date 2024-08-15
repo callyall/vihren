@@ -14,10 +14,11 @@ import {
     TimeService
 } from "../src";
 
-import { InputComponent } from "./components/input.component";
-import { FormComponent } from "./components/form.component";
-import { CounterComponent } from "./components/counter.component";
+import { InputComponent } from "./components/input.component/input.component";
+import { FormComponent } from "./components/form.component/form.component";
+import { CounterComponent } from "./components/counter.component/counter.component";
 import { CounterService } from "./services/counter.service";
+import { Dashboard } from "./components/dashboard.component/dashboard.component";
 
 window.onload = function () {
     const rootElement = document.getElementById('app') as HTMLElement;
@@ -38,4 +39,5 @@ window.onload = function () {
     componentContainer.registerComponent(InputComponent);
     componentContainer.registerComponent(FormComponent);
     componentContainer.registerComponent(CounterComponent);
+    componentContainer.registerComponent(Dashboard);
 }
