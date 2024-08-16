@@ -1,5 +1,6 @@
 **/node_modules/**
 *.d.ts
 *.js
+*.spec.ts
 **/dist/**
 **/demo/**

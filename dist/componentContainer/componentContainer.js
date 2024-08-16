@@ -7,6 +7,11 @@ const component_decorator_1 = require("../decorators/component.decorator/compone
 const query_decorator_1 = require("../decorators/query.decorator/query.decorator");
 const callback_decorator_1 = require("../decorators/callback.decorator/callback.decorator");
 const dynamicProperty_decorator_1 = require("../decorators/dynamicProperty.decorator/dynamicProperty.decorator");
+/**
+ * This is where the main logic of the application lives.
+ *
+ * This class is responsible for managing the components of the application.
+ */
 class ComponentContainer {
     constructor(root, iocContainer, changeDetector) {
         this.root = root;
@@ -54,6 +59,9 @@ class ComponentContainer {
             .subscribe((event) => {
             var _a;
             const metadata = Reflect.getMetadata(component_decorator_1.COMPONENT_METADATA_KEY, event.detail.component.constructor);
+            if (!metadata) {
+                return;
+            }
             const result = Array.from((_a = this.instances.get(metadata.selector)) !== null && _a !== void 0 ? _a : [])
                 .find((instance) => instance[1].instance === event.detail.component);
             if (!result) {
@@ -63,6 +71,13 @@ class ComponentContainer {
             this.onUpdated({ type: mutation_interface_1.MutationType.Updated, element: instance.element, target: instance.element }, [instance], metadata);
         });
     }
+    /**
+     * Registers a component with the container.
+     *
+     * After the component gets registered the component container will try to automatically initialize it.
+     *
+     * @param constructor
+     */
     registerComponent(constructor) {
         const metadata = Reflect.getMetadata(component_decorator_1.COMPONENT_METADATA_KEY, constructor);
         const callbackMetadata = Reflect.getMetadata(callback_decorator_1.CALLBACK_METADATA_KEY, constructor);
@@ -73,9 +88,17 @@ class ComponentContainer {
         this.components.set(metadata.selector, componentData);
         this.initComponent(componentData, this.root);
     }
+    /**
+     * Callback setup functions are used to set up public component methods as callbacks(event listeners, async method callbacks, etc.).
+     */
     registerCallbackSetupFunction(key, callbackSetupFunction) {
         this.callbackSetupFunctions.set(key, callbackSetupFunction);
     }
+    /**
+     * Get component instances by selector.
+     *
+     * @param selector a valid query selector
+     */
     getComponentInstancesBySelector(selector) {
         var _a;
         return (_a = this.instances.get(selector)) !== null && _a !== void 0 ? _a : new Map();

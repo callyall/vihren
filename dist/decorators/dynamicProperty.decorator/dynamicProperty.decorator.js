@@ -2,6 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DynamicProperty = exports.DYNAMIC_PROPERTY_UPDATE_EVENT = void 0;
 exports.DYNAMIC_PROPERTY_UPDATE_EVENT = 'dynamicPropertyUpdate';
+/**
+ * Decorator to define a dynamic property.
+ *
+ * This decorator will create getters and setters for the property that will trigger a render when the value is updated.
+ */
 const DynamicProperty = () => (target, property) => {
     if (typeof target['render'] != 'function') {
         throw new Error(`Property ${property} cannot be dynamic if the component is not dynamic`);

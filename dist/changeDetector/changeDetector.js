@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChangeDetector = void 0;
 const mutation_interface_1 = require("../interfaces/mutation.interface");
 const rxjs_1 = require("rxjs");
+/**
+ * Detects changes in the DOM.
+ */
 class ChangeDetector extends rxjs_1.Observable {
     constructor(root) {
         if (!root.parentNode) {

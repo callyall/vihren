@@ -13,6 +13,11 @@ import { ChangeDetectorInterface } from "../interfaces/changeDetector.interface"
 import { DynamicComponent } from "../interfaces/dynamicComponent.interface";
 import { DYNAMIC_PROPERTY_UPDATE_EVENT, DynamicPropertyUpdateEventDetail } from "../decorators/dynamicProperty.decorator/dynamicProperty.decorator";
 
+/**
+ * This is where the main logic of the application lives.
+ *
+ * This class is responsible for managing the components of the application.
+ */
 export class ComponentContainer {
     public static readonly COMPONENT_CONTAINER_KEY = 'componentContainer';
 
@@ -72,6 +77,10 @@ export class ComponentContainer {
             .subscribe((event) => {
                 const metadata: ComponentMetadata = Reflect.getMetadata(COMPONENT_METADATA_KEY, event.detail.component.constructor as Function);
 
+                if (!metadata) {
+                    return;
+                }
+
                 const result = Array.from(this.instances.get(metadata.selector) ?? [])
                     .find((instance) => instance[1].instance === event.detail.component);
 
@@ -89,6 +98,13 @@ export class ComponentContainer {
             });
     }
 
+    /**
+     * Registers a component with the container.
+     *
+     * After the component gets registered the component container will try to automatically initialize it.
+     *
+     * @param constructor
+     */
     public registerComponent(constructor: unknown): void {
         const metadata = Reflect.getMetadata(COMPONENT_METADATA_KEY, constructor as Function);
         const callbackMetadata = Reflect.getMetadata(CALLBACK_METADATA_KEY, constructor as Function);
@@ -104,10 +120,18 @@ export class ComponentContainer {
         this.initComponent(componentData, this.root);
     }
 
+    /**
+     * Callback setup functions are used to set up public component methods as callbacks(event listeners, async method callbacks, etc.).
+     */
     public registerCallbackSetupFunction<T>(key: string, callbackSetupFunction: CallbackSetupFunction<T>): void {
         this.callbackSetupFunctions.set(key, callbackSetupFunction);
     }
 
+    /**
+     * Get component instances by selector.
+     *
+     * @param selector a valid query selector
+     */
     public getComponentInstancesBySelector(selector: string): Map<string, ComponentInstance<any>> {
         return this.instances.get(selector) ?? new Map<string, ComponentInstance<any>>();
     }

@@ -2,6 +2,11 @@ import { InjectableMetadata, getInjectableMetadata } from "../injectable.decorat
 
 export const COMPONENT_METADATA_KEY = 'ioc:component';
 
+/**
+ * Decorator to define a component.
+ *
+ * Without using this decorator, the component will fail to register.
+ */
 export const Component = (args: ComponentMetadataInput): ClassDecorator => (target) => {
     const metadata = getInjectableMetadata(target) as ComponentMetadata;
     metadata.selector = args.selector;

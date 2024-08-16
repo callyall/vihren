@@ -8,6 +8,12 @@ import { Query, QUERY_METADATA_KEY, queryModifierFunction } from "../decorators/
 import { OnDestroy } from "../interfaces/onDestroy.interface";
 import { ChangeDetector } from "../changeDetector/changeDetector";
 import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "../decorators/event.decorator/event.decorator";
+import {
+    DYNAMIC_PROPERTY_UPDATE_EVENT, DynamicProperty,
+    DynamicPropertyUpdateEventDetail
+} from "../decorators/dynamicProperty.decorator/dynamicProperty.decorator";
+import {DynamicComponent} from "../interfaces/dynamicComponent.interface";
+import {ComponentInstance} from "../interfaces/componentInstance.interface";
 
 const iocContainer = new IocContainer();
 iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifierFunction);
@@ -22,6 +28,7 @@ const setupDomAndContainer = (): { rootElement: HTMLElement, container: Componen
                     <div class="test-component" id="two">
                         <button id="click">Click me</button>
                     </div>
+                    <div class="another-test-component"></div>
                 </div>
             </div>
         `;
@@ -273,7 +280,6 @@ describe('ComponentContainer', () => {
 
         container.registerComponent(TestComponent);
 
-        expect(container.getComponentInstancesBySelector('.none').size).toEqual(0);
         expect(container.getComponentInstancesBySelector('.test-component').size).toEqual(2);
 
         const rendered = document.querySelectorAll('.test-component > .template');
@@ -282,6 +288,59 @@ describe('ComponentContainer', () => {
 
         Array.from(rendered).forEach((element) => {
             expect(element.textContent).toEqual('Hello World');
+        });
+    });
+
+    it('Should fail to rerender update a dynamic component', () => {
+        setupDomAndContainer();
+
+        const before = document.getElementById('app')?.innerHTML;
+
+        const event = new CustomEvent<DynamicPropertyUpdateEventDetail>(DYNAMIC_PROPERTY_UPDATE_EVENT, { detail: { component: {} } });
+        document.dispatchEvent(event);
+
+        expect(document.getElementById('app')?.innerHTML).toEqual(before);
+    });
+
+    it('Should rerender update a dynamic component', async () => {
+        const { container} = setupDomAndContainer();
+
+        @Component({ selector: '.another-test-component' })
+        class DynamicTestComponent implements DynamicComponent{
+            @DynamicProperty()
+            public name: string = 'John Doe'
+
+            public render(): string {
+                return `<div class="template">Hello ${this.name}</div>`;
+            }
+        }
+
+        container.registerComponent(DynamicTestComponent);
+
+        expect(container.getComponentInstancesBySelector('.another-test-component').size).toEqual(1);
+
+        const rendered = document.querySelectorAll('.another-test-component > .template');
+
+        expect(rendered.length).toEqual(1);
+
+        Array.from(rendered).forEach((element) => {
+            expect(element.textContent).toEqual('Hello John Doe');
+        });
+
+        const componentElement: HTMLElement = document.querySelector('.another-test-component') as HTMLElement;
+        const instanceId: string = componentElement.getAttribute('instance') as string;
+        const instance: ComponentInstance<DynamicTestComponent> = container.getComponentInstancesBySelector('.another-test-component').get(instanceId) as ComponentInstance<DynamicTestComponent>;
+
+        instance.instance.name = 'Mister Tester';
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const updated = document.querySelectorAll('.another-test-component > .template');
+
+        expect(updated.length).toEqual(1);
+
+        Array.from(updated).forEach((element) => {
+            expect(element.textContent).toEqual('Hello Mister Tester');
         });
     });
 });

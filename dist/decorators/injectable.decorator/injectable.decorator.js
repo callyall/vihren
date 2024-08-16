@@ -3,6 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getInjectableMetadata = exports.Injectable = exports.INJECTABLE_METADATA_KEY = void 0;
 require("reflect-metadata");
 exports.INJECTABLE_METADATA_KEY = 'ioc:injectable';
+/**
+ * Decorator to define a class as injectable.
+ *
+ * The shared property is used to determine if the class should be shared across all object or a new instance should be instantiated every time.
+ */
 const Injectable = (args) => (target) => {
     Reflect.defineMetadata(exports.INJECTABLE_METADATA_KEY, (0, exports.getInjectableMetadata)(target, args), target);
 };

@@ -2,6 +2,11 @@ import { ComponentInstance } from "../interfaces/componentInstance.interface";
 import { IocContainerInterface } from "../interfaces/IocContainer.interface";
 import { CallbackSetupFunction } from "../decorators/callback.decorator/callback.decorator";
 import { ChangeDetectorInterface } from "../interfaces/changeDetector.interface";
+/**
+ * This is where the main logic of the application lives.
+ *
+ * This class is responsible for managing the components of the application.
+ */
 export declare class ComponentContainer {
     private root;
     private iocContainer;
@@ -15,8 +20,23 @@ export declare class ComponentContainer {
     private instances;
     private callbackSetupFunctions;
     constructor(root: HTMLElement, iocContainer: IocContainerInterface, changeDetector: ChangeDetectorInterface);
+    /**
+     * Registers a component with the container.
+     *
+     * After the component gets registered the component container will try to automatically initialize it.
+     *
+     * @param constructor
+     */
     registerComponent(constructor: unknown): void;
+    /**
+     * Callback setup functions are used to set up public component methods as callbacks(event listeners, async method callbacks, etc.).
+     */
     registerCallbackSetupFunction<T>(key: string, callbackSetupFunction: CallbackSetupFunction<T>): void;
+    /**
+     * Get component instances by selector.
+     *
+     * @param selector a valid query selector
+     */
     getComponentInstancesBySelector(selector: string): Map<string, ComponentInstance<any>>;
     private initComponents;
     private initComponent;

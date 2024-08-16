@@ -4,6 +4,9 @@ exports.eventCallbackSetupFunction = exports.Event = exports.EVENT_METADATA_KEY 
 const callback_decorator_1 = require("../callback.decorator/callback.decorator");
 const rxjs_1 = require("rxjs");
 exports.EVENT_METADATA_KEY = 'method:event';
+/**
+ * Decorator to define a DOM event listener
+ */
 const Event = (args) => (target, propertyKey) => {
     (0, callback_decorator_1.callback)({
         callback: propertyKey,
@@ -12,6 +15,11 @@ const Event = (args) => (target, propertyKey) => {
     }, target.constructor, propertyKey);
 };
 exports.Event = Event;
+/**
+ * The logic that subscribes to the event and calls the callback method.
+ *
+ * This will be called internally, and you will not need to call it yourself.
+ */
 const eventCallbackSetupFunction = (metadata, instance) => {
     var _a;
     let observable = (0, rxjs_1.fromEvent)(instance.element, metadata.data.type)

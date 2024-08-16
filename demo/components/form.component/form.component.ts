@@ -10,10 +10,19 @@ import {
 import { InputComponent } from "../input.component/input.component";
 import template from "./form.component.html"
 
+/**
+ * The @Component decorator is used to declare a class as a component.
+ * In addition to that this component is using a html template that is passed to the decorator.
+ * This template will be rendered once when the component is created, but is not dynamic, and it will not be updated automatically.
+ */
 export @Component({ selector: '#form-component', template })
 class FormComponent implements OnDestroy {
     private inputValidity: Map<string, boolean> = new Map<string, boolean>([['email', false], ['password', false]]);
 
+    /**
+     * The @ChildComponent decorator is used to inject a child component instance into a component.
+     * The @Query decorator is used to inject a query selector result into a component.
+     */
     public constructor(
         // @ChildComponent({ selector: '#email-component', componentSelector: '.input-component' }) private emailComponent: ChildComponentReference<InputComponent>,
         // @ChildComponent({ selector: '#password-component', componentSelector: '.input-component' }) private passwordComponent: ChildComponentReference<InputComponent>,
@@ -27,6 +36,10 @@ class FormComponent implements OnDestroy {
         return Array.from(this.inputValidity.values()).reduce((acc, curr) => acc && curr, true);
     }
 
+    /**
+     * The @Event decorator is used to declare a method as an event listener.
+     * The event listener will automatically be removed when the component gets destroyed.
+     */
     @Event({ type: 'click', selector: '#submit' })
     public onSubmit(e: Event): void {
         e.preventDefault();
@@ -43,6 +56,11 @@ class FormComponent implements OnDestroy {
         document.getElementById('app')?.prepend(div);
     }
 
+    /**
+     * THe @ComponentEvent decorator is used to declare a method as a component event listener.
+     * THe component event is emitted by the ComponentEventEmitter.
+     * This listener will automatically be removed when the component gets destroyed.
+     */
     @ComponentEvent({ type: 'inputValidation' })
     public onValidate(payload: ComponentEventPayload<string, boolean>): void {
         this.inputValidity.set(payload.source, payload.data);

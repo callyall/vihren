@@ -9,16 +9,38 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TimeService = void 0;
 const rxjs_1 = require("rxjs");
 const injectable_decorator_1 = require("../../decorators/injectable.decorator/injectable.decorator");
+/**
+ * A service that provides time related functions.
+ */
 let TimeService = class TimeService {
+    /**
+     * Set a timeout.
+     * @param ms the time in milliseconds
+     */
     sleep(ms) {
         return new Promise((r) => setTimeout(r, ms));
     }
+    /**
+     * Set a timeout.
+     *
+     * This will return an observable that will emit a value after the timeout.
+     *
+     * @param ms the time in milliseconds
+     */
     sleepRx(ms) {
         return new rxjs_1.Observable((subscriber) => {
             const timeout = setTimeout(() => subscriber.next(), ms);
             return () => clearTimeout(timeout);
         });
     }
+    /**
+     * Create an interval.
+     *
+     * This will return an observable that will emit a value every `ms` milliseconds.
+     *
+     * @param ms the time in milliseconds.
+     * @param scheduler an optional scheduler.
+     */
     interval(ms, scheduler) {
         return (0, rxjs_1.interval)(ms, scheduler);
     }

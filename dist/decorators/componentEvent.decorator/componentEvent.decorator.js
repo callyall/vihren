@@ -5,6 +5,9 @@ const callback_decorator_1 = require("../callback.decorator/callback.decorator")
 const rxjs_1 = require("rxjs");
 const componentEventEmitter_1 = require("../../services/eventEmitter/componentEventEmitter");
 exports.COMPONENT_EVENT_METADATA_KEY = 'method:componentEvent';
+/**
+ * Decorator to define a component event listener
+ */
 const ComponentEvent = (args) => (target, propertyKey) => {
     (0, callback_decorator_1.callback)({
         callback: propertyKey,
@@ -13,6 +16,11 @@ const ComponentEvent = (args) => (target, propertyKey) => {
     }, target.constructor, propertyKey);
 };
 exports.ComponentEvent = ComponentEvent;
+/**
+ * The logic that subscribes to the event emitter and calls the callback method.
+ *
+ * This will be called internally, and you will not need to call it yourself.
+ */
 const componentEventCallbackSetupFunction = (metadata, instance, iocContainer) => {
     var _a;
     const eventEmitter = iocContainer.resolve(componentEventEmitter_1.ComponentEventEmitter);

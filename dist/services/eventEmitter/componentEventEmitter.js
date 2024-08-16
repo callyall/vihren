@@ -12,13 +12,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ComponentEventEmitter = void 0;
 const injectable_decorator_1 = require("../../decorators/injectable.decorator/injectable.decorator");
 const rxjs_1 = require("rxjs");
+/**
+ * This is a special service that emits component events.
+ *
+ * This service is used to pass data from one component to another.
+ */
 let ComponentEventEmitter = class ComponentEventEmitter {
     constructor() {
         this.subject = new rxjs_1.Subject();
     }
+    /**
+     * Emit an event.
+     */
     emit(type, data) {
         this.subject.next({ type, data });
     }
+    /**
+     * Listen for an event
+     *
+     * If you are using the @CompnentEvent decorator, you don't need to use this method as it will be called automatically.
+     */
     on(type) {
         return this
             .subject

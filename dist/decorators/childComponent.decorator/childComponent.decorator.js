@@ -5,6 +5,9 @@ const componentContainer_1 = require("../../componentContainer/componentContaine
 const argumentModifier_decorator_1 = require("../argumentModifier.decorator/argumentModifier.decorator");
 const query_decorator_1 = require("../query.decorator/query.decorator");
 exports.CHILD_COMPONENT_METADATA_KEY = 'childComponent:metadata';
+/**
+ * Decorator to inject a child component reference into a component
+ */
 const ChildComponent = (args) => (target, propertyKey, parameterIndex) => {
     var _a;
     const metadata = {
@@ -18,6 +21,11 @@ const ChildComponent = (args) => (target, propertyKey, parameterIndex) => {
     (0, argumentModifier_decorator_1.argumentModifier)(metadata, target, parameterIndex);
 };
 exports.ChildComponent = ChildComponent;
+/**
+ * The logic that retrieves the child component instances and passes them to the component
+ *
+ * This will be called internally, and you will not need to call it yourself
+ */
 const childComponentModifierFunction = (argumentMetadata, paramMetadata, args) => {
     if (!args.has(query_decorator_1.ROOT_ELEMENT_KEY)) {
         throw new Error('No root element found');
@@ -55,10 +63,16 @@ class AbstractComponentReference {
         return instances.get(instanceId);
     }
 }
+/**
+ * Dynamic reference to a child component.
+ */
 class ChildComponentReference extends AbstractComponentReference {
     constructor(rootElement, selector, componentSelector, componentContainer) {
         super(rootElement, selector, componentSelector, componentContainer);
     }
+    /**
+     * Get the child component.
+     */
     get() {
         const element = this.rootElement.querySelector(this.selector);
         if (!element) {
@@ -68,10 +82,16 @@ class ChildComponentReference extends AbstractComponentReference {
     }
 }
 exports.ChildComponentReference = ChildComponentReference;
+/**
+ * Dynamic reference to a collection of child components.
+ */
 class ChildComponentCollection extends AbstractComponentReference {
     constructor(rootElement, selector, componentSelector, componentContainer) {
         super(rootElement, selector, componentSelector, componentContainer);
     }
+    /**
+     * Get all child components.
+     */
     get() {
         const elements = this.rootElement.querySelectorAll(this.selector);
         if (!elements.length) {

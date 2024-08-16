@@ -2,7 +2,9 @@ import { Mutation, MutationType } from "../interfaces/mutation.interface";
 import { filter, Observable, Subscriber } from "rxjs";
 import { ChangeDetectorInterface } from "../interfaces/changeDetector.interface";
 
-
+/**
+ * Detects changes in the DOM.
+ */
 export class ChangeDetector extends Observable<Mutation> implements ChangeDetectorInterface
 {
     public constructor(private readonly root: HTMLElement)

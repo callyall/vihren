@@ -4,6 +4,9 @@ import { ComponentInstance } from "../../interfaces/componentInstance.interface"
 
 export const EVENT_METADATA_KEY = 'method:event';
 
+/**
+ * Decorator to define a DOM event listener
+ */
 export const Event = (args: EventMetadata) => (target: Object, propertyKey: string | symbol): void => {
     callback<EventMetadata>(
         {
@@ -16,6 +19,11 @@ export const Event = (args: EventMetadata) => (target: Object, propertyKey: stri
     );
 };
 
+/**
+ * The logic that subscribes to the event and calls the callback method.
+ *
+ * This will be called internally, and you will not need to call it yourself.
+ */
 export const eventCallbackSetupFunction: CallbackSetupFunction<EventMetadata> = (metadata: CallbackMetadata<EventMetadata>, instance: ComponentInstance<any>): Subscription => {
     let observable = fromEvent(instance.element, metadata.data.type)
         .pipe(filter((event: Event) => (event.target as HTMLElement).matches(metadata.data.selector)));

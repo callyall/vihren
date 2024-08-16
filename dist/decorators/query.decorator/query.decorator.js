@@ -4,6 +4,11 @@ exports.ActiveElementCollection = exports.ActiveElementReference = exports.query
 const argumentModifier_decorator_1 = require("../argumentModifier.decorator/argumentModifier.decorator");
 exports.ROOT_ELEMENT_KEY = 'rootElement';
 exports.QUERY_METADATA_KEY = 'argument:query';
+/**
+ * Decorator to inject a query selector result into a component
+ *
+ * The results can be either dynamic or static, and can be a single result or a collection of results.
+ */
 const Query = (args) => (target, propertyKey, parameterIndex) => {
     var _a;
     const queryMetadata = {
@@ -21,6 +26,11 @@ const Query = (args) => (target, propertyKey, parameterIndex) => {
     (0, argumentModifier_decorator_1.argumentModifier)(metadata, target, parameterIndex);
 };
 exports.Query = Query;
+/**
+ * The logic that retrieves the elements and passes them to the component
+ *
+ * This will be called internally, and you will not need to call it yourself
+ */
 const queryModifierFunction = (argumentMetadata, paramMetadata, args) => {
     if (!args.has(exports.ROOT_ELEMENT_KEY)) {
         throw new Error('No root element found');
@@ -55,21 +65,33 @@ const queryModifierFunction = (argumentMetadata, paramMetadata, args) => {
     return args;
 };
 exports.queryModifierFunction = queryModifierFunction;
+/**
+ * Dynamic reference to an HTML element.
+ */
 class ActiveElementReference {
     constructor(rootElement, selector) {
         this.rootElement = rootElement;
         this.selector = selector;
     }
+    /**
+     * Get the element.
+     */
     get() {
         return this.rootElement.querySelector(this.selector);
     }
 }
 exports.ActiveElementReference = ActiveElementReference;
+/**
+ * Dynamic reference to a collection of HTML elements.
+ */
 class ActiveElementCollection {
     constructor(rootElement, selector) {
         this.rootElement = rootElement;
         this.selector = selector;
     }
+    /**
+     * Get the elements.
+     */
     get() {
         return Array.from(this.rootElement.querySelectorAll(this.selector));
     }

@@ -3,6 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LifecycleHook = exports.Component = exports.COMPONENT_METADATA_KEY = void 0;
 const injectable_decorator_1 = require("../injectable.decorator/injectable.decorator");
 exports.COMPONENT_METADATA_KEY = 'ioc:component';
+/**
+ * Decorator to define a component.
+ *
+ * Without using this decorator, the component will fail to register.
+ */
 const Component = (args) => (target) => {
     const metadata = (0, injectable_decorator_1.getInjectableMetadata)(target);
     metadata.selector = args.selector;
