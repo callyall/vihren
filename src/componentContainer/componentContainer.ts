@@ -1,4 +1,4 @@
-import { Subscription } from "rxjs";
+import { fromEvent, Subscription } from "rxjs";
 import { Mutation, MutationType } from "../interfaces/mutation.interface";
 import { ComponentData } from "../interfaces/componentData.interface";
 import { COMPONENT_METADATA_KEY, ComponentMetadata, LifecycleHook } from "../decorators/component.decorator/component.decorator";
@@ -8,19 +8,18 @@ import { OnChange } from "../interfaces/onChange.interface";
 import { ComponentInstance } from "../interfaces/componentInstance.interface";
 import { ROOT_ELEMENT_KEY } from "../decorators/query.decorator/query.decorator";
 import { IocContainerInterface } from "../interfaces/IocContainer.interface";
-import {
-    CALLBACK_METADATA_KEY,
-    CallbackMetadata,
-    CallbackSetupFunction
-} from "../decorators/callback.decorator/callback.decorator";
+import { CALLBACK_METADATA_KEY, CallbackMetadata, CallbackSetupFunction } from "../decorators/callback.decorator/callback.decorator";
 import { ChangeDetectorInterface } from "../interfaces/changeDetector.interface";
+import { DynamicComponent } from "../interfaces/dynamicComponent.interface";
+import { DYNAMIC_PROPERTY_UPDATE_EVENT, DynamicPropertyUpdateEventDetail } from "../decorators/dynamicProperty.decorator/dynamicProperty.decorator";
 
 export class ComponentContainer {
     public static readonly COMPONENT_CONTAINER_KEY = 'componentContainer';
 
-    private $removedObserver: Subscription
-    private $addedObserver: Subscription
-    private $updatedObserver: Subscription
+    private $removedObserver: Subscription;
+    private $addedObserver: Subscription;
+    private $updatedObserver: Subscription;
+    private $dynamicPropertyListener: Subscription;
     private components: Map<string, ComponentData> = new Map<string, ComponentData>();
     private instances: Map<string, Map<string, ComponentInstance<any>>> = new Map<string, Map<string, ComponentInstance<any>>>();
     private callbackSetupFunctions: Map<string, CallbackSetupFunction<any>> = new Map<string, CallbackSetupFunction<any>>();
@@ -69,6 +68,25 @@ export class ComponentContainer {
                 },
             });
 
+        this.$dynamicPropertyListener = fromEvent<CustomEvent<DynamicPropertyUpdateEventDetail>>(document, DYNAMIC_PROPERTY_UPDATE_EVENT)
+            .subscribe((event) => {
+                const metadata: ComponentMetadata = Reflect.getMetadata(COMPONENT_METADATA_KEY, event.detail.component.constructor as Function);
+
+                const result = Array.from(this.instances.get(metadata.selector) ?? [])
+                    .find((instance) => instance[1].instance === event.detail.component);
+
+                if (!result) {
+                   return;
+                }
+
+                const instance = result[1];
+
+                this.onUpdated(
+                    { type: MutationType.Updated, element: instance.element, target: instance.element },
+                    [instance],
+                    metadata
+                );
+            });
     }
 
     public registerComponent(constructor: unknown): void {
@@ -126,6 +144,10 @@ export class ComponentContainer {
             }
 
             const instance: any = this.iocContainer.resolve(componentData.constructor, this.constructArgs((element as HTMLElement)));
+
+            if (componentData.metadata.isDynamic) {
+                element.innerHTML = (instance as DynamicComponent).render();
+            }
 
             if (componentData.metadata.lifecycleHooks.includes(LifecycleHook.OnInit)) {
                 (instance as OnInit).onInit();
@@ -208,6 +230,14 @@ export class ComponentContainer {
             if (metadata.lifecycleHooks.includes(LifecycleHook.OnChange)) {
                 (instance.instance as OnChange).onChange(mutation);
             }
+
+            if (metadata.isDynamic) {
+                const newContent = (instance.instance as DynamicComponent).render();
+
+                if (instance.element.innerHTML !== newContent) {
+                    instance.element.innerHTML = newContent;
+                }
+            }
         }
     }
 
@@ -249,6 +279,7 @@ export class ComponentContainer {
         this.$removedObserver.unsubscribe();
         this.$addedObserver.unsubscribe();
         this.$updatedObserver.unsubscribe();
+        this.$dynamicPropertyListener.unsubscribe();
     }
 
     private destroyInstance(instance: ComponentInstance<any>, componentMetadata: ComponentMetadata): void {

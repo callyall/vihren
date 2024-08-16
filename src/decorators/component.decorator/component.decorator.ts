@@ -7,12 +7,18 @@ export const Component = (args: ComponentMetadataInput): ClassDecorator => (targ
     metadata.selector = args.selector;
     metadata.template = args.template;
     metadata.lifecycleHooks = Object.values(LifecycleHook).filter((hook: string) => typeof target.prototype[hook] == 'function') as LifecycleHook[];
+    metadata.isDynamic = typeof target.prototype['render'] == 'function';
+
+    if (metadata.template && metadata.isDynamic) {
+        throw new Error(`Component ${target.name} cannot have both a template and be dynamic`);
+    }
 
     Reflect.defineMetadata(COMPONENT_METADATA_KEY, metadata, target);
 };
 
 export interface ComponentMetadata extends InjectableMetadata, ComponentMetadataInput {
     lifecycleHooks: LifecycleHook[];
+    isDynamic: boolean;
 }
 
 export interface ComponentMetadataInput {

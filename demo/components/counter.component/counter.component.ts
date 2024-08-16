@@ -1,28 +1,26 @@
-import { Component, OnDestroy, OnInit, Query } from "../../../src";
+import { Component, DynamicComponent, DynamicProperty, OnDestroy, OnInit, Query } from "../../../src";
 import { Subscription } from "rxjs";
 import { CounterService } from "../../services/counter.service";
-import template from './counter.component.html';
 
-@Component({
-    selector: '#counter-component',
-    template,
-})
-export class CounterComponent implements OnInit, OnDestroy {
+@Component({ selector: '#counter-component' })
+export class CounterComponent implements OnInit, OnDestroy, DynamicComponent {
+    @DynamicProperty()
+    private headerText: string = 'Redirecting in ';
+
     private counterSubscription: Subscription | null = null;
 
     public constructor(
         @Query() private readonly rootElement: HTMLDivElement,
-        @Query({ selector: 'h1' }) private readonly header: HTMLHeadingElement,
         private readonly counterService: CounterService,
     ) {
     }
 
     public onInit(): void {
-        this
+       this.counterSubscription = this
             .counterService
             .getCounter()
             .subscribe({
-                next: (counter: number) => this.header.textContent = `Redirecting in ${counter}`,
+                next: (counter: number) => this.headerText = `Redirecting in ${counter}`,
                 complete: () => this.rootElement.remove(),
             });
     }
@@ -30,5 +28,13 @@ export class CounterComponent implements OnInit, OnDestroy {
     public onDestroy(): void {
         this.counterSubscription?.unsubscribe();
         document.getElementById('form-component')?.remove();
+    }
+
+    public render(): string {
+        return `
+            <div class="row mt-4 p-5 bg-primary text-white rounded justify-content-center">
+                <h1>${this.headerText}</h1>
+            </div>
+        `;
     }
 }

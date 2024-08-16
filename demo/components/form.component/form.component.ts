@@ -10,10 +10,7 @@ import {
 import { InputComponent } from "../input.component/input.component";
 import template from "./form.component.html"
 
-export @Component({ 
-    selector: '#form-component',
-    template
-})
+export @Component({ selector: '#form-component', template })
 class FormComponent implements OnDestroy {
     private inputValidity: Map<string, boolean> = new Map<string, boolean>([['email', false], ['password', false]]);
 

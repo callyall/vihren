@@ -1,14 +1,29 @@
-import { Component, OnInit, Query } from "../../../src";
-import template from './dashboard.component.html'
+import {Component, Event, DynamicProperty, DynamicComponent, OnInit} from "../../../src";
 
-@Component({ selector: '#dashboard', template })
-export class Dashboard implements OnInit {
-    public constructor(
-        @Query({ selector: '#name' }) public readonly nameParagraph: HTMLParagraphElement,
-        public readonly name: string,
-    ) {}
+@Component({ selector: '#dashboard' })
+export class Dashboard implements DynamicComponent, OnInit {
+    @DynamicProperty()
+    private title: string = 'You are logged in.';
+
+    public constructor(private readonly name: string) {}
 
     public onInit(): void {
-        this.nameParagraph.innerHTML = this.name;
+        setTimeout(() => {
+            this.title = 'I changed dynamically! Click me to change again!';
+        }, 3000);
+    }
+
+    @Event({ type: 'click', selector: '#title' })
+    public onClick() {
+        this.title = 'You clicked me and I changed dynamically!';
+    }
+
+    public render(): string {
+        return `
+            <div class="row mt-4 p-5 bg-primary text-white rounded justify-content-center">
+                <h1 id="title">${this.title}</h1>
+                <p>${this.name}</p>
+            </div>
+        `;
     }
 }

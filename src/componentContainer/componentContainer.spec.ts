@@ -258,4 +258,30 @@ describe('ComponentContainer', () => {
 
         document.getElementById('child')?.remove();
     });
+
+    it('Should render a component with a template', () => {
+        const { container} = setupDomAndContainer();
+
+        @Component({
+            selector: '.test-component',
+            template: '<div class="template">Hello World</div>'
+        })
+        class TestComponent {
+            public constructor(@Query() private rootElement: HTMLElement) {
+            }
+        }
+
+        container.registerComponent(TestComponent);
+
+        expect(container.getComponentInstancesBySelector('.none').size).toEqual(0);
+        expect(container.getComponentInstancesBySelector('.test-component').size).toEqual(2);
+
+        const rendered = document.querySelectorAll('.test-component > .template');
+
+        expect(rendered.length).toEqual(2);
+
+        Array.from(rendered).forEach((element) => {
+            expect(element.textContent).toEqual('Hello World');
+        });
+    });
 });

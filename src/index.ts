@@ -26,6 +26,11 @@ export {
     ComponentEventOptions,
 } from './decorators/componentEvent.decorator/componentEvent.decorator';
 export {
+    DynamicProperty,
+    DYNAMIC_PROPERTY_UPDATE_EVENT,
+    DynamicPropertyUpdateEventDetail
+} from './decorators/dynamicProperty.decorator/dynamicProperty.decorator';
+export {
     EVENT_METADATA_KEY,
     Event,
     eventCallbackSetupFunction,
@@ -55,6 +60,7 @@ export {
 export { ChangeDetectorInterface } from './interfaces/changeDetector.interface';
 export { ComponentData } from './interfaces/componentData.interface';
 export { ComponentInstance } from './interfaces/componentInstance.interface';
+export { DynamicComponent } from './interfaces/dynamicComponent.interface';
 export { IocContainerInterface } from './interfaces/IocContainer.interface';
 export { Mutation, MutationType} from './interfaces/mutation.interface';
 export { OnChange } from './interfaces/onChange.interface';
