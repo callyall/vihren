@@ -5,7 +5,7 @@ export declare class IocContainer implements IocContainerInterface {
     private argumentModifiers;
     registerValue<T>(key: string, value: T): void;
     registerFactory<T>(key: string, factoryFunction: FactoryFunction<T>): void;
-    resolve<T>(target: Function | string, args?: Map<string, any>, failIfNoShared?: boolean): T;
+    resolve<T>(target: unknown | string, args?: Map<string, any>, failIfNoShared?: boolean): T;
     registerArgumentModifier<T>(key: string, modifierFunction: ModifierFunction<T>): void;
     private defaultFactory;
     private prepareArgs;

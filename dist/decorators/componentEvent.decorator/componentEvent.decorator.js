@@ -5,7 +5,7 @@ const callback_decorator_1 = require("../callback.decorator/callback.decorator")
 const rxjs_1 = require("rxjs");
 const componentEventEmitter_1 = require("../../services/eventEmitter/componentEventEmitter");
 exports.COMPONENT_EVENT_METADATA_KEY = 'method:componentEvent';
-const ComponentEvent = (args) => (target, propertyKey, descriptor) => {
+const ComponentEvent = (args) => (target, propertyKey) => {
     (0, callback_decorator_1.callback)({
         callback: propertyKey,
         key: exports.COMPONENT_EVENT_METADATA_KEY,

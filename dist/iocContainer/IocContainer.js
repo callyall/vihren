@@ -19,7 +19,7 @@ class IocContainer {
     resolve(target, args, failIfNoShared = false) {
         var _a;
         const isClass = target instanceof Function;
-        const key = isClass ? target.name : target;
+        const key = (isClass ? target.name : target);
         if (failIfNoShared && !this.values.has(key)) {
             throw new Error(`No shared instance found for key ${key}`);
         }
@@ -57,7 +57,7 @@ class IocContainer {
             return new target.prototype.constructor();
         }
         const params = metadata.params.map(param => {
-            if (args === null || args === void 0 ? void 0 : args.has(param.name)) {
+            if (args && (args === null || args === void 0 ? void 0 : args.has(param.name))) {
                 return args.get(param.name);
             }
             if (this.values.has(param.name)) {

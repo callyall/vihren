@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ComponentEventEmitter = exports.ChangeDetector = exports.IocContainer = exports.MutationType = exports.ActiveElementCollection = exports.ActiveElementReference = exports.queryModifierFunction = exports.Query = exports.QUERY_METADATA_KEY = exports.ROOT_ELEMENT_KEY = exports.getInjectableMetadata = exports.Injectable = exports.eventCallbackSetupFunction = exports.Event = exports.EVENT_METADATA_KEY = exports.componentEventCallbackSetupFunction = exports.ComponentEvent = exports.COMPONENT_EVENT_METADATA_KEY = exports.LifecycleHook = exports.Component = exports.COMPONENT_METADATA_KEY = exports.ChildComponentCollection = exports.ChildComponentReference = exports.childComponentModifierFunction = exports.ChildComponent = exports.CHILD_COMPONENT_METADATA_KEY = exports.callback = exports.argumentModifier = exports.ComponentContainer = void 0;
+exports.TimeService = exports.ComponentEventEmitter = exports.ChangeDetector = exports.IocContainer = exports.MutationType = exports.ActiveElementCollection = exports.ActiveElementReference = exports.queryModifierFunction = exports.Query = exports.QUERY_METADATA_KEY = exports.ROOT_ELEMENT_KEY = exports.getInjectableMetadata = exports.Injectable = exports.eventCallbackSetupFunction = exports.Event = exports.EVENT_METADATA_KEY = exports.DYNAMIC_PROPERTY_UPDATE_EVENT = exports.DynamicProperty = exports.componentEventCallbackSetupFunction = exports.ComponentEvent = exports.COMPONENT_EVENT_METADATA_KEY = exports.LifecycleHook = exports.Component = exports.COMPONENT_METADATA_KEY = exports.ChildComponentCollection = exports.ChildComponentReference = exports.childComponentModifierFunction = exports.ChildComponent = exports.CHILD_COMPONENT_METADATA_KEY = exports.callback = exports.argumentModifier = exports.ComponentContainer = void 0;
 var componentContainer_1 = require("./componentContainer/componentContainer");
 Object.defineProperty(exports, "ComponentContainer", { enumerable: true, get: function () { return componentContainer_1.ComponentContainer; } });
 // Decorators
@@ -22,6 +22,9 @@ var componentEvent_decorator_1 = require("./decorators/componentEvent.decorator/
 Object.defineProperty(exports, "COMPONENT_EVENT_METADATA_KEY", { enumerable: true, get: function () { return componentEvent_decorator_1.COMPONENT_EVENT_METADATA_KEY; } });
 Object.defineProperty(exports, "ComponentEvent", { enumerable: true, get: function () { return componentEvent_decorator_1.ComponentEvent; } });
 Object.defineProperty(exports, "componentEventCallbackSetupFunction", { enumerable: true, get: function () { return componentEvent_decorator_1.componentEventCallbackSetupFunction; } });
+var dynamicProperty_decorator_1 = require("./decorators/dynamicProperty.decorator/dynamicProperty.decorator");
+Object.defineProperty(exports, "DynamicProperty", { enumerable: true, get: function () { return dynamicProperty_decorator_1.DynamicProperty; } });
+Object.defineProperty(exports, "DYNAMIC_PROPERTY_UPDATE_EVENT", { enumerable: true, get: function () { return dynamicProperty_decorator_1.DYNAMIC_PROPERTY_UPDATE_EVENT; } });
 var event_decorator_1 = require("./decorators/event.decorator/event.decorator");
 Object.defineProperty(exports, "EVENT_METADATA_KEY", { enumerable: true, get: function () { return event_decorator_1.EVENT_METADATA_KEY; } });
 Object.defineProperty(exports, "Event", { enumerable: true, get: function () { return event_decorator_1.Event; } });
@@ -46,4 +49,6 @@ Object.defineProperty(exports, "ChangeDetector", { enumerable: true, get: functi
 // Services
 var componentEventEmitter_1 = require("./services/eventEmitter/componentEventEmitter");
 Object.defineProperty(exports, "ComponentEventEmitter", { enumerable: true, get: function () { return componentEventEmitter_1.ComponentEventEmitter; } });
+var time_service_1 = require("./services/time.service/time.service");
+Object.defineProperty(exports, "TimeService", { enumerable: true, get: function () { return time_service_1.TimeService; } });
 //# sourceMappingURL=index.js.map

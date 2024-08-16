@@ -1,7 +1,7 @@
 export const DYNAMIC_PROPERTY_UPDATE_EVENT = 'dynamicPropertyUpdate';
 
 export const DynamicProperty = () => (target: unknown, property: string): any => {
-    if (typeof target['render'] != 'function') {
+    if (typeof (target as any)['render'] != 'function') {
         throw new Error(`Property ${property} cannot be dynamic if the component is not dynamic`);
     }
 

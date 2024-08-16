@@ -4,7 +4,7 @@ exports.eventCallbackSetupFunction = exports.Event = exports.EVENT_METADATA_KEY 
 const callback_decorator_1 = require("../callback.decorator/callback.decorator");
 const rxjs_1 = require("rxjs");
 exports.EVENT_METADATA_KEY = 'method:event';
-const Event = (args) => (target, propertyKey, descriptor) => {
+const Event = (args) => (target, propertyKey) => {
     (0, callback_decorator_1.callback)({
         callback: propertyKey,
         key: exports.EVENT_METADATA_KEY,
@@ -12,7 +12,7 @@ const Event = (args) => (target, propertyKey, descriptor) => {
     }, target.constructor, propertyKey);
 };
 exports.Event = Event;
-const eventCallbackSetupFunction = (metadata, instance, iocContainer) => {
+const eventCallbackSetupFunction = (metadata, instance) => {
     var _a;
     let observable = (0, rxjs_1.fromEvent)(instance.element, metadata.data.type)
         .pipe((0, rxjs_1.filter)((event) => event.target.matches(metadata.data.selector)));

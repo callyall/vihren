@@ -16,8 +16,8 @@ class ChangeDetector extends rxjs_1.Observable {
             var _a;
             let updated = [];
             let added = [];
-            let removed = [];
-            for (let mutation of mutations) {
+            const removed = [];
+            for (const mutation of mutations) {
                 if (Array.from((_a = mutation.removedNodes) !== null && _a !== void 0 ? _a : []).find((node) => node === this.root)) {
                     subscriber.complete();
                     return;
@@ -29,14 +29,14 @@ class ChangeDetector extends rxjs_1.Observable {
                     updated.push({ element: mutation.target, type: mutation_interface_1.MutationType.Updated, target: mutation.target });
                 }
                 if (mutation.removedNodes) {
-                    for (let node of mutation.removedNodes) {
+                    for (const node of mutation.removedNodes) {
                         if (!removed.find((m) => m.element === node)) {
                             removed.push({ element: node, type: mutation_interface_1.MutationType.Removed, target: mutation.target });
                         }
                     }
                 }
                 if (mutation.addedNodes.length > 0) {
-                    for (let node of mutation.addedNodes) {
+                    for (const node of mutation.addedNodes) {
                         if (!added.find((m) => m.element === node)) {
                             added.push({ element: node, type: mutation_interface_1.MutationType.Added, target: mutation.target });
                         }

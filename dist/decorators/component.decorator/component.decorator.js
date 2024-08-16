@@ -6,7 +6,12 @@ exports.COMPONENT_METADATA_KEY = 'ioc:component';
 const Component = (args) => (target) => {
     const metadata = (0, injectable_decorator_1.getInjectableMetadata)(target);
     metadata.selector = args.selector;
+    metadata.template = args.template;
     metadata.lifecycleHooks = Object.values(LifecycleHook).filter((hook) => typeof target.prototype[hook] == 'function');
+    metadata.isDynamic = typeof target.prototype['render'] == 'function';
+    if (metadata.template && metadata.isDynamic) {
+        throw new Error(`Component ${target.name} cannot have both a template and be dynamic`);
+    }
     Reflect.defineMetadata(exports.COMPONENT_METADATA_KEY, metadata, target);
 };
 exports.Component = Component;

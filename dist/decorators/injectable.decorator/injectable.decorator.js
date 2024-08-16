@@ -13,7 +13,7 @@ const getInjectableMetadata = (target, args) => {
     if (!paramTypes) {
         return metadata;
     }
-    let result = /constructor\s*\([^)]*\)/.exec(target.toString());
+    const result = /constructor\s*\([^)]*\)/.exec(target.toString());
     metadata.params = result[0]
         .replace(/constructor\s*\(/, '')
         .replace(')', '')

@@ -10,11 +10,12 @@ export declare class ComponentContainer {
     private $removedObserver;
     private $addedObserver;
     private $updatedObserver;
+    private $dynamicPropertyListener;
     private components;
     private instances;
     private callbackSetupFunctions;
     constructor(root: HTMLElement, iocContainer: IocContainerInterface, changeDetector: ChangeDetectorInterface);
-    registerComponent(constructor: Function): void;
+    registerComponent(constructor: unknown): void;
     registerCallbackSetupFunction<T>(key: string, callbackSetupFunction: CallbackSetupFunction<T>): void;
     getComponentInstancesBySelector(selector: string): Map<string, ComponentInstance<any>>;
     private initComponents;

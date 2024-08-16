@@ -1,10 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ComponentContainer = void 0;
+const rxjs_1 = require("rxjs");
 const mutation_interface_1 = require("../interfaces/mutation.interface");
 const component_decorator_1 = require("../decorators/component.decorator/component.decorator");
 const query_decorator_1 = require("../decorators/query.decorator/query.decorator");
 const callback_decorator_1 = require("../decorators/callback.decorator/callback.decorator");
+const dynamicProperty_decorator_1 = require("../decorators/dynamicProperty.decorator/dynamicProperty.decorator");
 class ComponentContainer {
     constructor(root, iocContainer, changeDetector) {
         this.root = root;
@@ -20,7 +22,7 @@ class ComponentContainer {
             .subscribe({
             next: (mutation) => {
                 const affectedComponents = this.getAffectedComponentData(mutation);
-                for (let { selector, components, metadata } of affectedComponents) {
+                for (const { selector, components, metadata } of affectedComponents) {
                     this.onRemoved(mutation, selector, components, metadata);
                 }
             },
@@ -32,8 +34,8 @@ class ComponentContainer {
             .subscribe({
             next: (mutation) => {
                 const affectedComponents = this.getAffectedComponentData(mutation);
-                for (let { selector, components, metadata } of affectedComponents) {
-                    this.onAdded(mutation, selector, components, metadata);
+                for (const { components, metadata } of affectedComponents) {
+                    this.onAdded(mutation, components, metadata);
                 }
             },
         });
@@ -43,10 +45,22 @@ class ComponentContainer {
             .subscribe({
             next: (mutation) => {
                 const affectedComponents = this.getAffectedComponentData(mutation);
-                for (let { selector, components, metadata } of affectedComponents) {
-                    this.onUpdated(mutation, selector, components, metadata);
+                for (const { components, metadata } of affectedComponents) {
+                    this.onUpdated(mutation, components, metadata);
                 }
             },
+        });
+        this.$dynamicPropertyListener = (0, rxjs_1.fromEvent)(document, dynamicProperty_decorator_1.DYNAMIC_PROPERTY_UPDATE_EVENT)
+            .subscribe((event) => {
+            var _a;
+            const metadata = Reflect.getMetadata(component_decorator_1.COMPONENT_METADATA_KEY, event.detail.component.constructor);
+            const result = Array.from((_a = this.instances.get(metadata.selector)) !== null && _a !== void 0 ? _a : [])
+                .find((instance) => instance[1].instance === event.detail.component);
+            if (!result) {
+                return;
+            }
+            const instance = result[1];
+            this.onUpdated({ type: mutation_interface_1.MutationType.Updated, element: instance.element, target: instance.element }, [instance], metadata);
         });
     }
     registerComponent(constructor) {
@@ -55,9 +69,9 @@ class ComponentContainer {
         if (!metadata) {
             throw new Error('Component metadata not found');
         }
-        const componentData = { constructor, metadata, callbackMetadata };
+        const componentData = { constructor: constructor, metadata, callbackMetadata };
         this.components.set(metadata.selector, componentData);
-        this.initComponent(componentData);
+        this.initComponent(componentData, this.root);
     }
     registerCallbackSetupFunction(key, callbackSetupFunction) {
         this.callbackSetupFunctions.set(key, callbackSetupFunction);
@@ -66,15 +80,15 @@ class ComponentContainer {
         var _a;
         return (_a = this.instances.get(selector)) !== null && _a !== void 0 ? _a : new Map();
     }
-    initComponents() {
-        for (let componentData of this.components.values()) {
-            this.initComponent(componentData);
+    initComponents(target) {
+        for (const componentData of this.components.values()) {
+            this.initComponent(componentData, target !== null && target !== void 0 ? target : this.root);
         }
     }
-    initComponent(componentData) {
+    initComponent(componentData, root) {
         var _a;
         let i = 0;
-        for (let element of this.root.querySelectorAll(componentData.metadata.selector)) {
+        for (const element of root.querySelectorAll(componentData.metadata.selector)) {
             let instances = this.instances.get(componentData.metadata.selector);
             if (!instances) {
                 instances = new Map();
@@ -87,7 +101,13 @@ class ComponentContainer {
                 }
                 continue;
             }
+            if (componentData.metadata.template) {
+                element.innerHTML = componentData.metadata.template;
+            }
             const instance = this.iocContainer.resolve(componentData.constructor, this.constructArgs(element));
+            if (componentData.metadata.isDynamic) {
+                element.innerHTML = instance.render();
+            }
             if (componentData.metadata.lifecycleHooks.includes(component_decorator_1.LifecycleHook.OnInit)) {
                 instance.onInit();
             }
@@ -95,7 +115,8 @@ class ComponentContainer {
             i++;
             const subscriptions = [];
             const instanceObject = { instance, element: element, subscriptions };
-            for (let [_, metadataArr] of (_a = componentData.callbackMetadata) !== null && _a !== void 0 ? _a : []) {
+            for (const keyValue of (_a = componentData.callbackMetadata) !== null && _a !== void 0 ? _a : []) {
+                const metadataArr = keyValue[1];
                 metadataArr.forEach((metadata) => {
                     const callbackSetupFunction = this.callbackSetupFunctions.get(metadata.key);
                     if (!callbackSetupFunction) {
@@ -111,7 +132,7 @@ class ComponentContainer {
     constructArgs(element) {
         const args = element.dataset;
         const result = new Map();
-        for (let [key, value] of Object.entries(args)) {
+        for (const [key, value] of Object.entries(args)) {
             result.set(key, value);
         }
         result.set(query_decorator_1.ROOT_ELEMENT_KEY, element);
@@ -132,27 +153,33 @@ class ComponentContainer {
             }
         }
     }
-    onAdded(mutation, selector, components, metadata) {
+    onAdded(mutation, components, metadata) {
         for (let i = 0; i < components.length; i++) {
             const instance = components[i];
             if (metadata.lifecycleHooks.includes(component_decorator_1.LifecycleHook.OnChange)) {
                 instance.instance.onChange(mutation);
             }
         }
-        this.initComponents();
+        this.initComponents((mutation.target));
     }
-    onUpdated(mutation, selector, components, metadata) {
+    onUpdated(mutation, components, metadata) {
         for (let i = 0; i < components.length; i++) {
             const instance = components[i];
             if (metadata.lifecycleHooks.includes(component_decorator_1.LifecycleHook.OnChange)) {
                 instance.instance.onChange(mutation);
+            }
+            if (metadata.isDynamic) {
+                const newContent = instance.instance.render();
+                if (instance.element.innerHTML !== newContent) {
+                    instance.element.innerHTML = newContent;
+                }
             }
         }
     }
     getAffectedComponentData(mutation) {
         var _a, _b;
         const found = [];
-        for (let [selector, { metadata }] of this.components) {
+        for (const [selector, { metadata }] of this.components) {
             const instances = Array.from((_b = (_a = this.instances.get(selector)) === null || _a === void 0 ? void 0 : _a.values()) !== null && _b !== void 0 ? _b : []);
             found.push({
                 selector,
@@ -170,7 +197,7 @@ class ComponentContainer {
         return found;
     }
     onDestroy() {
-        for (let [selector, componentData] of this.components) {
+        for (const [selector, componentData] of this.components) {
             const instances = this.instances.get(selector);
             instances === null || instances === void 0 ? void 0 : instances.forEach((instance) => this.destroyInstance(instance, componentData.metadata));
             instances === null || instances === void 0 ? void 0 : instances.clear();
@@ -178,6 +205,7 @@ class ComponentContainer {
         this.$removedObserver.unsubscribe();
         this.$addedObserver.unsubscribe();
         this.$updatedObserver.unsubscribe();
+        this.$dynamicPropertyListener.unsubscribe();
     }
     destroyInstance(instance, componentMetadata) {
         instance.subscriptions.forEach((subscription) => subscription.unsubscribe());
