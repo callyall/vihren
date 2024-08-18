@@ -1,3 +1,3 @@
-# Components
+# Vihren
 
-### Improved version of our components with dependency injection
+### A component based front end framework
