@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TimeService = exports.ComponentEventEmitter = exports.ChangeDetector = exports.IocContainer = exports.MutationType = exports.ActiveElementCollection = exports.ActiveElementReference = exports.queryModifierFunction = exports.Query = exports.QUERY_METADATA_KEY = exports.ROOT_ELEMENT_KEY = exports.getInjectableMetadata = exports.Injectable = exports.eventCallbackSetupFunction = exports.Event = exports.EVENT_METADATA_KEY = exports.DYNAMIC_PROPERTY_UPDATE_EVENT = exports.DynamicProperty = exports.componentEventCallbackSetupFunction = exports.ComponentEvent = exports.COMPONENT_EVENT_METADATA_KEY = exports.LifecycleHook = exports.Component = exports.COMPONENT_METADATA_KEY = exports.ChildComponentCollection = exports.ChildComponentReference = exports.childComponentModifierFunction = exports.ChildComponent = exports.CHILD_COMPONENT_METADATA_KEY = exports.callback = exports.argumentModifier = exports.ComponentContainer = void 0;
+exports.Feature = exports.Application = exports.TimeService = exports.ComponentEventEmitter = exports.ChangeDetector = exports.IocContainer = exports.MutationType = exports.ActiveElementCollection = exports.ActiveElementReference = exports.queryModifierFunction = exports.Query = exports.QUERY_METADATA_KEY = exports.ROOT_ELEMENT_KEY = exports.getInjectableMetadata = exports.Injectable = exports.eventCallbackSetupFunction = exports.Event = exports.EVENT_METADATA_KEY = exports.DYNAMIC_PROPERTY_UPDATE_EVENT = exports.DynamicProperty = exports.componentEventCallbackSetupFunction = exports.ComponentEvent = exports.COMPONENT_EVENT_METADATA_KEY = exports.LifecycleHook = exports.Component = exports.COMPONENT_METADATA_KEY = exports.ChildComponentCollection = exports.ChildComponentReference = exports.childComponentModifierFunction = exports.ChildComponent = exports.CHILD_COMPONENT_METADATA_KEY = exports.callback = exports.argumentModifier = exports.ComponentContainer = void 0;
 var componentContainer_1 = require("./componentContainer/componentContainer");
 Object.defineProperty(exports, "ComponentContainer", { enumerable: true, get: function () { return componentContainer_1.ComponentContainer; } });
 // Decorators
@@ -51,4 +51,7 @@ var componentEventEmitter_1 = require("./services/eventEmitter/componentEventEmi
 Object.defineProperty(exports, "ComponentEventEmitter", { enumerable: true, get: function () { return componentEventEmitter_1.ComponentEventEmitter; } });
 var time_service_1 = require("./services/time.service/time.service");
 Object.defineProperty(exports, "TimeService", { enumerable: true, get: function () { return time_service_1.TimeService; } });
+var application_1 = require("./application/application");
+Object.defineProperty(exports, "Application", { enumerable: true, get: function () { return application_1.Application; } });
+Object.defineProperty(exports, "Feature", { enumerable: true, get: function () { return application_1.Feature; } });
 //# sourceMappingURL=index.js.map

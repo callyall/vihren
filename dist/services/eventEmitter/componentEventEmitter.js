@@ -39,9 +39,9 @@ let ComponentEventEmitter = class ComponentEventEmitter {
             .pipe((0, rxjs_1.filter)((e) => e.type === type), (0, rxjs_1.map)((e) => e.data));
     }
 };
-exports.ComponentEventEmitter = ComponentEventEmitter;
-exports.ComponentEventEmitter = ComponentEventEmitter = __decorate([
+ComponentEventEmitter = __decorate([
     (0, injectable_decorator_1.Injectable)({ shared: true }),
     __metadata("design:paramtypes", [])
 ], ComponentEventEmitter);
+exports.ComponentEventEmitter = ComponentEventEmitter;
 //# sourceMappingURL=componentEventEmitter.js.map

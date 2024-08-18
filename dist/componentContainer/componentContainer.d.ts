@@ -8,7 +8,7 @@ import { ChangeDetectorInterface } from "../interfaces/changeDetector.interface"
  * This class is responsible for managing the components of the application.
  */
 export declare class ComponentContainer {
-    private root;
+    private rootElement;
     private iocContainer;
     private changeDetector;
     static readonly COMPONENT_CONTAINER_KEY = "componentContainer";
@@ -19,7 +19,8 @@ export declare class ComponentContainer {
     private components;
     private instances;
     private callbackSetupFunctions;
-    constructor(root: HTMLElement, iocContainer: IocContainerInterface, changeDetector: ChangeDetectorInterface);
+    constructor(rootElement: HTMLElement, iocContainer: IocContainerInterface, changeDetector: ChangeDetectorInterface);
+    init(): void;
     /**
      * Registers a component with the container.
      *

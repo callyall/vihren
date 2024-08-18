@@ -13,14 +13,22 @@ const dynamicProperty_decorator_1 = require("../decorators/dynamicProperty.decor
  * This class is responsible for managing the components of the application.
  */
 class ComponentContainer {
-    constructor(root, iocContainer, changeDetector) {
-        this.root = root;
+    constructor(rootElement, iocContainer, changeDetector) {
+        this.rootElement = rootElement;
         this.iocContainer = iocContainer;
         this.changeDetector = changeDetector;
+        this.$removedObserver = null;
+        this.$addedObserver = null;
+        this.$updatedObserver = null;
+        this.$dynamicPropertyListener = null;
         this.components = new Map();
         this.instances = new Map();
         this.callbackSetupFunctions = new Map();
-        this.initComponents();
+    }
+    init() {
+        if (this.$removedObserver || this.$addedObserver || this.$updatedObserver || this.$dynamicPropertyListener) {
+            return;
+        }
         this.$removedObserver = this
             .changeDetector
             .onRemoved()
@@ -70,6 +78,7 @@ class ComponentContainer {
             const instance = result[1];
             this.onUpdated({ type: mutation_interface_1.MutationType.Updated, element: instance.element, target: instance.element }, [instance], metadata);
         });
+        this.initComponents();
     }
     /**
      * Registers a component with the container.
@@ -86,7 +95,9 @@ class ComponentContainer {
         }
         const componentData = { constructor: constructor, metadata, callbackMetadata };
         this.components.set(metadata.selector, componentData);
-        this.initComponent(componentData, this.root);
+        if (this.$removedObserver || this.$addedObserver || this.$updatedObserver || this.$dynamicPropertyListener) {
+            this.initComponent(componentData, this.rootElement);
+        }
     }
     /**
      * Callback setup functions are used to set up public component methods as callbacks(event listeners, async method callbacks, etc.).
@@ -105,13 +116,13 @@ class ComponentContainer {
     }
     initComponents(target) {
         for (const componentData of this.components.values()) {
-            this.initComponent(componentData, target !== null && target !== void 0 ? target : this.root);
+            this.initComponent(componentData, target !== null && target !== void 0 ? target : this.rootElement);
         }
     }
-    initComponent(componentData, root) {
+    initComponent(componentData, rootElement) {
         var _a;
         let i = 0;
-        for (const element of root.querySelectorAll(componentData.metadata.selector)) {
+        for (const element of rootElement.querySelectorAll(componentData.metadata.selector)) {
             let instances = this.instances.get(componentData.metadata.selector);
             if (!instances) {
                 instances = new Map();
@@ -122,6 +133,7 @@ class ComponentContainer {
                 if (!Array.from(instances.keys()).includes(instanceId)) {
                     throw new Error(`Invalid instance id ${instanceId} for component ${componentData.metadata.selector}`);
                 }
+                // Instance already initialized
                 continue;
             }
             if (componentData.metadata.template) {
@@ -220,15 +232,16 @@ class ComponentContainer {
         return found;
     }
     onDestroy() {
+        var _a, _b, _c, _d;
         for (const [selector, componentData] of this.components) {
             const instances = this.instances.get(selector);
             instances === null || instances === void 0 ? void 0 : instances.forEach((instance) => this.destroyInstance(instance, componentData.metadata));
             instances === null || instances === void 0 ? void 0 : instances.clear();
         }
-        this.$removedObserver.unsubscribe();
-        this.$addedObserver.unsubscribe();
-        this.$updatedObserver.unsubscribe();
-        this.$dynamicPropertyListener.unsubscribe();
+        (_a = this.$removedObserver) === null || _a === void 0 ? void 0 : _a.unsubscribe();
+        (_b = this.$addedObserver) === null || _b === void 0 ? void 0 : _b.unsubscribe();
+        (_c = this.$updatedObserver) === null || _c === void 0 ? void 0 : _c.unsubscribe();
+        (_d = this.$dynamicPropertyListener) === null || _d === void 0 ? void 0 : _d.unsubscribe();
     }
     destroyInstance(instance, componentMetadata) {
         instance.subscriptions.forEach((subscription) => subscription.unsubscribe());
@@ -237,6 +250,6 @@ class ComponentContainer {
         }
     }
 }
-exports.ComponentContainer = ComponentContainer;
 ComponentContainer.COMPONENT_CONTAINER_KEY = 'componentContainer';
+exports.ComponentContainer = ComponentContainer;
 //# sourceMappingURL=componentContainer.js.map

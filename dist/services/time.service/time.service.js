@@ -45,8 +45,8 @@ let TimeService = class TimeService {
         return (0, rxjs_1.interval)(ms, scheduler);
     }
 };
-exports.TimeService = TimeService;
-exports.TimeService = TimeService = __decorate([
+TimeService = __decorate([
     (0, injectable_decorator_1.Injectable)({ shared: true })
 ], TimeService);
+exports.TimeService = TimeService;
 //# sourceMappingURL=time.service.js.map

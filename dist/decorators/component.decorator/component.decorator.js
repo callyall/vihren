@@ -25,5 +25,5 @@ var LifecycleHook;
     LifecycleHook["OnInit"] = "onInit";
     LifecycleHook["OnChange"] = "onChange";
     LifecycleHook["OnDestroy"] = "onDestroy";
-})(LifecycleHook || (exports.LifecycleHook = LifecycleHook = {}));
+})(LifecycleHook = exports.LifecycleHook || (exports.LifecycleHook = {}));
 //# sourceMappingURL=component.decorator.js.map

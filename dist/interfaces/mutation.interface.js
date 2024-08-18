@@ -6,5 +6,5 @@ var MutationType;
     MutationType[MutationType["Added"] = 0] = "Added";
     MutationType[MutationType["Removed"] = 1] = "Removed";
     MutationType[MutationType["Updated"] = 2] = "Updated";
-})(MutationType || (exports.MutationType = MutationType = {}));
+})(MutationType = exports.MutationType || (exports.MutationType = {}));
 //# sourceMappingURL=mutation.interface.js.map
