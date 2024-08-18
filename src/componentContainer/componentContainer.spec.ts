@@ -4,7 +4,7 @@ import { OnInit } from "../interfaces/onInit.interface";
 import { ComponentContainer } from "./componentContainer";
 import { IocContainer } from "../iocContainer/IocContainer";
 import { Mutation, MutationType } from "../interfaces/mutation.interface";
-import { Query, QUERY_METADATA_KEY, queryModifierFunction } from "../decorators/query.decorator/query.decorator";
+import { QUERY_METADATA_KEY, queryModifierFunction } from "../decorators/query.decorator/query.decorator";
 import { OnDestroy } from "../interfaces/onDestroy.interface";
 import { ChangeDetector } from "../changeDetector/changeDetector";
 import { Event, EVENT_METADATA_KEY, eventCallbackSetupFunction } from "../decorators/event.decorator/event.decorator";
@@ -12,8 +12,8 @@ import {
     DYNAMIC_PROPERTY_UPDATE_EVENT, DynamicProperty,
     DynamicPropertyUpdateEventDetail
 } from "../decorators/dynamicProperty.decorator/dynamicProperty.decorator";
-import {DynamicComponent} from "../interfaces/dynamicComponent.interface";
-import {ComponentInstance} from "../interfaces/componentInstance.interface";
+import { DynamicComponent } from "../interfaces/dynamicComponent.interface";
+import { ComponentInstance } from "../interfaces/componentInstance.interface";
 
 const iocContainer = new IocContainer();
 iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifierFunction);
@@ -39,6 +39,10 @@ const setupDomAndContainer = (): { rootElement: HTMLElement, container: Componen
         iocContainer,
         new ChangeDetector(rootElement)
     );
+
+    // This is intentional
+    container.init();
+    container.init();
 
     return {rootElement, container};
 }
@@ -237,6 +241,8 @@ describe('ComponentContainer', () => {
             iocContainer,
             new ChangeDetector(rootElement)
         );
+
+        container.init();
 
         let detectChange = true;
 

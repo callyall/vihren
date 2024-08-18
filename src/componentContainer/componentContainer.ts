@@ -21,20 +21,25 @@ import { DYNAMIC_PROPERTY_UPDATE_EVENT, DynamicPropertyUpdateEventDetail } from 
 export class ComponentContainer {
     public static readonly COMPONENT_CONTAINER_KEY = 'componentContainer';
 
-    private $removedObserver: Subscription;
-    private $addedObserver: Subscription;
-    private $updatedObserver: Subscription;
-    private $dynamicPropertyListener: Subscription;
+    private $removedObserver: Subscription|null = null;
+    private $addedObserver: Subscription|null = null;
+    private $updatedObserver: Subscription|null = null;
+    private $dynamicPropertyListener: Subscription|null = null;
     private components: Map<string, ComponentData> = new Map<string, ComponentData>();
     private instances: Map<string, Map<string, ComponentInstance<any>>> = new Map<string, Map<string, ComponentInstance<any>>>();
     private callbackSetupFunctions: Map<string, CallbackSetupFunction<any>> = new Map<string, CallbackSetupFunction<any>>();
 
     public constructor(
-        private root: HTMLElement,
+        private rootElement: HTMLElement,
         private iocContainer: IocContainerInterface,
         private changeDetector: ChangeDetectorInterface
-    ) {
-        this.initComponents();
+    ) {}
+
+    public init(): void {
+        if (this.$removedObserver || this.$addedObserver || this.$updatedObserver || this.$dynamicPropertyListener) {
+            return;
+        }
+
         this.$removedObserver = this
             .changeDetector
             .onRemoved()
@@ -96,6 +101,8 @@ export class ComponentContainer {
                     metadata
                 );
             });
+
+        this.initComponents();
     }
 
     /**
@@ -117,7 +124,9 @@ export class ComponentContainer {
 
         this.components.set(metadata.selector, componentData);
 
-        this.initComponent(componentData, this.root);
+        if (this.$removedObserver || this.$addedObserver || this.$updatedObserver || this.$dynamicPropertyListener) {
+            this.initComponent(componentData, this.rootElement);
+        }
     }
 
     /**
@@ -138,13 +147,13 @@ export class ComponentContainer {
 
     private initComponents(target?: HTMLElement): void {
         for (const componentData of this.components.values()) {
-            this.initComponent(componentData, target ?? this.root);
+            this.initComponent(componentData, target ?? this.rootElement);
         }
     }
 
-    private initComponent(componentData: ComponentData, root: HTMLElement): void {
+    private initComponent(componentData: ComponentData, rootElement: HTMLElement): void {
         let i = 0;
-        for (const element of root.querySelectorAll(componentData.metadata.selector)) {
+        for (const element of rootElement.querySelectorAll(componentData.metadata.selector)) {
             let instances = this.instances.get(componentData.metadata.selector);
 
             if (!instances) {
@@ -160,6 +169,7 @@ export class ComponentContainer {
                     throw new Error(`Invalid instance id ${instanceId} for component ${componentData.metadata.selector}`);
                 }
 
+                // Instance already initialized
                 continue;
             }
 
@@ -300,10 +310,10 @@ export class ComponentContainer {
             instances?.clear();
         }
 
-        this.$removedObserver.unsubscribe();
-        this.$addedObserver.unsubscribe();
-        this.$updatedObserver.unsubscribe();
-        this.$dynamicPropertyListener.unsubscribe();
+        this.$removedObserver?.unsubscribe();
+        this.$addedObserver?.unsubscribe();
+        this.$updatedObserver?.unsubscribe();
+        this.$dynamicPropertyListener?.unsubscribe();
     }
 
     private destroyInstance(instance: ComponentInstance<any>, componentMetadata: ComponentMetadata): void {

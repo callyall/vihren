@@ -5,32 +5,43 @@ import { ChangeDetectorInterface } from "../interfaces/changeDetector.interface"
 /**
  * Detects changes in the DOM.
  */
-export class ChangeDetector extends Observable<Mutation> implements ChangeDetectorInterface
-{
-    public constructor(private readonly root: HTMLElement)
-    {
-        if (!root.parentNode) {
+export class ChangeDetector extends Observable<Mutation> implements ChangeDetectorInterface {
+    private mutationObserver: MutationObserver | null = null;
+    private subscribers: Subscriber<Mutation>[] = [];
+
+    public constructor(private readonly rootElement: HTMLElement) {
+        if (!rootElement.parentNode) {
             throw new Error('Root element does not have a parent node');
         }
 
         super((subscriber) => this.init(subscriber));
     }
 
-    private init(subscriber: Subscriber<Mutation>): () => void
-    {
-        const observer = new MutationObserver(
+    private init(subscriber: Subscriber<Mutation>): () => void {
+        this.subscribers.push(subscriber);
+
+        if (!this.mutationObserver) {
+            this.startMutationObserver();
+        }
+
+        return () => this.onTeardown(subscriber);
+    }
+
+    private startMutationObserver(): void {
+
+        this.mutationObserver = new MutationObserver(
             (mutations: MutationRecord[]) => {
                 let updated: Mutation[] = [];
                 let added: Mutation[] = [];
                 const removed: Mutation[] = [];
 
                 for (const mutation of mutations) {
-                    if (Array.from(mutation.removedNodes ?? []).find((node) => node === this.root)) {
-                        subscriber.complete();
+                    if (Array.from(mutation.removedNodes ?? []).find((node) => node === this.rootElement)) {
+                        this.detach();
                         return;
                     }
 
-                    if (!this.root.contains(mutation.target)) {
+                    if (!this.rootElement.contains(mutation.target)) {
                         continue;
                     }
 
@@ -58,34 +69,43 @@ export class ChangeDetector extends Observable<Mutation> implements ChangeDetect
                 updated = updated.filter((sm) => !removed.find((tm) => tm.element === sm.element));
                 added = added.filter((sm) => !removed.find((tm) => tm.element === sm.element));
 
-                removed.forEach((m) => subscriber.next(m));
-                added.forEach((m) => subscriber.next(m));
-                updated.forEach((m) => subscriber.next(m));
+                removed.forEach((m) => this.subscribers.forEach((subscriber) => subscriber.next(m)));
+                added.forEach((m) => this.subscribers.forEach((subscriber) => subscriber.next(m)));
+                updated.forEach((m) => this.subscribers.forEach((subscriber) => subscriber.next(m)));
             }
         );
 
-        observer.observe(this.root.parentNode as Node, {
+        this.mutationObserver.observe(this.rootElement.parentNode as Node, {
             childList: true,
             subtree: true,
             attributes: true,
             characterData: true,
         });
 
-        return () => observer.disconnect();
     }
 
-    public onRemoved(): Observable<Mutation>
-    {
+    private onTeardown(subscriber: Subscriber<Mutation>): void {
+        const index = this.subscribers.indexOf(subscriber);
+
+        if (index) {
+            this.subscribers.splice(index, 1);
+        }
+    }
+
+    private detach(): void {
+        this.mutationObserver?.disconnect();
+        this.subscribers.forEach((subscriber) => subscriber.complete());
+    }
+
+    public onRemoved(): Observable<Mutation> {
         return this.pipe(filter((mutation) => mutation.type === MutationType.Removed));
     }
 
-    public onAdded(): Observable<Mutation>
-    {
+    public onAdded(): Observable<Mutation> {
         return this.pipe(filter((mutation) => mutation.type === MutationType.Added));
     }
 
-    public onUpdated(): Observable<Mutation>
-    {
+    public onUpdated(): Observable<Mutation> {
         return this.pipe(filter((mutation) => mutation.type === MutationType.Updated));
     }
 }

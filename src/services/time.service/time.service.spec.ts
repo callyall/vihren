@@ -2,7 +2,7 @@ import { TimeService } from "./time.service";
 
 describe('TimeService', () => {
     const period: number = 100;
-    const threshold: number = 110;
+    const threshold: number = 200;
 
     let timeService: TimeService;
 

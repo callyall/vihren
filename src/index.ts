@@ -74,3 +74,5 @@ export { ChangeDetector } from './changeDetector/changeDetector';
 // Services
 export { ComponentEventEmitter, ComponentEventPayload } from './services/eventEmitter/componentEventEmitter';
 export { TimeService } from './services/time.service/time.service';
+
+export { Application, Feature } from './application/application';
