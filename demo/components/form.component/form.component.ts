@@ -15,8 +15,8 @@ import template from "./form.component.html"
  * In addition to that this component is using a html template that is passed to the decorator.
  * This template will be rendered once when the component is created, but is not dynamic, and it will not be updated automatically.
  */
-export @Component({ selector: '#form-component', template })
-class FormComponent implements OnDestroy {
+@Component({ selector: '#form-component', template })
+export class FormComponent implements OnDestroy {
     private inputValidity: Map<string, boolean> = new Map<string, boolean>([['email', false], ['password', false]]);
 
     /**
