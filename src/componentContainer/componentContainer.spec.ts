@@ -14,6 +14,7 @@ import {
 } from "../decorators/dynamicProperty.decorator/dynamicProperty.decorator";
 import { DynamicComponent } from "../interfaces/dynamicComponent.interface";
 import { ComponentInstance } from "../interfaces/componentInstance.interface";
+import { Query } from "../decorators/query.decorator/query.decorator";
 
 const iocContainer = new IocContainer();
 iocContainer.registerArgumentModifier(QUERY_METADATA_KEY, queryModifierFunction);

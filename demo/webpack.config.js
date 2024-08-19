@@ -3,8 +3,9 @@ const path = require('path');
 module.exports = {
     mode: 'development',
     entry: {
-        main: './demo/main.ts',
+        gettingStarted: './demo/gettingStarted.ts',
         components: './demo/components.ts',
+        servicesAndDependencies: './demo/servicesAndDependencies.ts',
     },
     devtool: 'source-map',
     module: {

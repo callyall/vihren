@@ -87,9 +87,17 @@ export class IocContainer implements IocContainerInterface {
             }
 
             if (this.factories.has(param.type.name)) {
+                const dependencyMetadata = Reflect.getMetadata(INJECTABLE_METADATA_KEY, param.type) as InjectableMetadata | null;
+
                 const factory = this.factories.get(param.type.name) as (args?: Map<string, any>) => any;
 
-                return factory(args);
+                const result = factory(args);
+
+                if (dependencyMetadata?.shared) {
+                    this.values.set(param.type.name, result);
+                }
+
+                return result;
             }
 
             if ([String.name, Number.name, Boolean.name].includes(param.type.name)) {
